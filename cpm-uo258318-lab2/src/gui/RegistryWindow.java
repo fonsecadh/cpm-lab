@@ -13,11 +13,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.border.TitledBorder;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
+import java.awt.event.KeyEvent;
+import java.util.Calendar;
+import java.util.stream.IntStream;
+
+import javax.swing.DefaultComboBoxModel;
 
 public class RegistryWindow extends JFrame {
 
@@ -66,7 +72,7 @@ public class RegistryWindow extends JFrame {
 	public RegistryWindow() {
 		setTitle("Customer Information");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 664, 372);
+		setBounds(100, 100, 653, 355);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -81,6 +87,7 @@ public class RegistryWindow extends JFrame {
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
+			btnCancel.setMnemonic('c');
 			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					 System.exit(0);
@@ -96,6 +103,12 @@ public class RegistryWindow extends JFrame {
 	private JButton getBtnNext() {
 		if (btnNext == null) {
 			btnNext = new JButton("Next");
+			btnNext.setMnemonic('n');
+			btnNext.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {					
+					checkComponents();					
+				}				
+			});
 			btnNext.setForeground(Color.WHITE);
 			btnNext.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			btnNext.setBackground(new Color(46, 139, 87));
@@ -103,6 +116,31 @@ public class RegistryWindow extends JFrame {
 		}
 		return btnNext;
 	}
+	
+	private void checkComponents() {
+		// We retrieve the components we need to check
+		JTextField theTxtNameSurname = getTxtNameSurname();
+		JPasswordField thePfPasswd = getPfPasswd();
+		JPasswordField thePfPasswdRep = getPfPasswdRep();					
+		
+		// We check that none of the text fields is empty
+		if (theTxtNameSurname.getText().equals("") 
+				|| String.valueOf(thePfPasswd.getPassword()).equals("") 
+				|| String.valueOf(thePfPasswdRep.getPassword()).equals("")) {
+			JOptionPane.showMessageDialog(
+					null, "Some fields are empty", "Unable to continue", 
+					JOptionPane.ERROR_MESSAGE);
+		}					
+		
+		// Both password fields match
+		if (!String.valueOf(thePfPasswd.getPassword())
+				.equals(String.valueOf(thePfPasswdRep.getPassword()))) {
+			JOptionPane.showMessageDialog(
+					null, "Passwords do not match", "Unable to continue", 
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
 	private JPanel getCustomerInfoPanel() {
 		if (customerInfoPanel == null) {
 			customerInfoPanel = new JPanel();
@@ -136,6 +174,7 @@ public class RegistryWindow extends JFrame {
 	private JLabel getLblNameSurname() {
 		if (lblNameSurname == null) {
 			lblNameSurname = new JLabel("Name and Surname:");
+			lblNameSurname.setDisplayedMnemonic(KeyEvent.VK_N);
 			lblNameSurname.setLabelFor(getTxtNameSurname());
 			lblNameSurname.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			lblNameSurname.setBounds(10, 33, 157, 17);
@@ -154,6 +193,7 @@ public class RegistryWindow extends JFrame {
 	private JLabel getLblBirthrate() {
 		if (lblBirthrate == null) {
 			lblBirthrate = new JLabel("Birthrate:");
+			lblBirthrate.setDisplayedMnemonic(KeyEvent.VK_B);
 			lblBirthrate.setLabelFor(getCbBirthrate());
 			lblBirthrate.setFont(new Font("Dialog", Font.PLAIN, 14));
 			lblBirthrate.setBounds(10, 67, 122, 21);
@@ -163,7 +203,10 @@ public class RegistryWindow extends JFrame {
 	private JComboBox getCbBirthrate() {
 		if (cbBirthrate == null) {
 			cbBirthrate = new JComboBox();
-			cbBirthrate.setFont(new Font("Dialog", Font.BOLD, 14));
+			IntStream
+				.range(1900, Calendar.getInstance().get(Calendar.YEAR) + 1)
+				.forEach(date -> cbBirthrate.addItem(date));
+			cbBirthrate.setFont(new Font("Dialog", Font.PLAIN, 14));
 			cbBirthrate.setBounds(185, 65, 418, 24);
 		}
 		return cbBirthrate;
@@ -171,6 +214,7 @@ public class RegistryWindow extends JFrame {
 	private JLabel getLblPasswd() {
 		if (lblPasswd == null) {
 			lblPasswd = new JLabel("Password:");
+			lblPasswd.setDisplayedMnemonic(KeyEvent.VK_P);
 			lblPasswd.setLabelFor(getPfPasswd());
 			lblPasswd.setFont(new Font("Dialog", Font.PLAIN, 14));
 			lblPasswd.setBounds(10, 106, 122, 21);
@@ -188,6 +232,7 @@ public class RegistryWindow extends JFrame {
 	private JLabel getLblPasswdRep() {
 		if (lblPasswdRep == null) {
 			lblPasswdRep = new JLabel("Repeat password:");
+			lblPasswdRep.setDisplayedMnemonic(KeyEvent.VK_R);
 			lblPasswdRep.setLabelFor(getPfPasswdRep());
 			lblPasswdRep.setFont(new Font("Dialog", Font.PLAIN, 14));
 			lblPasswdRep.setBounds(10, 145, 145, 21);
@@ -205,6 +250,8 @@ public class RegistryWindow extends JFrame {
 	private JRadioButton getRdbtnOnSite() {
 		if (rdbtnOnSite == null) {
 			rdbtnOnSite = new JRadioButton("On site");
+			rdbtnOnSite.setMnemonic('s');
+			rdbtnOnSite.setSelected(true);
 			buttonGroup.add(rdbtnOnSite);
 			rdbtnOnSite.setBackground(Color.WHITE);
 			rdbtnOnSite.setFont(new Font("Dialog", Font.PLAIN, 14));
@@ -215,6 +262,7 @@ public class RegistryWindow extends JFrame {
 	private JRadioButton getRdbtnTakeAway() {
 		if (rdbtnTakeAway == null) {
 			rdbtnTakeAway = new JRadioButton("Take away");
+			rdbtnTakeAway.setMnemonic('t');
 			buttonGroup.add(rdbtnTakeAway);
 			rdbtnTakeAway.setFont(new Font("Dialog", Font.PLAIN, 14));
 			rdbtnTakeAway.setBackground(Color.WHITE);
