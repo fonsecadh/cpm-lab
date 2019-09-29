@@ -159,8 +159,10 @@ public class Workshop {
 			}
 			
 			if (selectedUnits <= 0 && !incorrectInputType) {
-				System.out.println("Invalid input. Please specify a valid number of units");
+				System.out.println("Invalid input. Please specify a valid number of units");				
 			}
+			
+			incorrectInputType = false;
 		}
 		
 		return selectedUnits;
