@@ -26,7 +26,7 @@ public class RegistryWindow extends JDialog {
 	// Constants
 	private static final long serialVersionUID = 1L;
 	
-	// Variables
+	// Attributes
 	private JPanel contentPane;
 	private JButton btnCancel;
 	private JButton btnNext;

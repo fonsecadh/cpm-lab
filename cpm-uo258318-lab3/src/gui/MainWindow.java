@@ -19,6 +19,8 @@ import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame {
 
+	
+	// Attributes
 	private JPanel contentPane;
 	private JLabel lblLogo;
 	private JLabel lblMcdonalds;

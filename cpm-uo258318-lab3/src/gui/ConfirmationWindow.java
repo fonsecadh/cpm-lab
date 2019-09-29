@@ -10,6 +10,8 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 
 public class ConfirmationWindow extends JDialog {
+	
+	// Attributes
 	private JLabel lblOk;
 	private JLabel lblProcessing;
 	private JLabel lblYourOrderCode;
