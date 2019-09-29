@@ -3,6 +3,7 @@ package workshop;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ public class Workshop {
 
 	// Main
 	public static void main(String[] args) {
+		@SuppressWarnings("unused")
 		Workshop workshop = new Workshop();
 	}
 	
@@ -65,8 +67,13 @@ public class Workshop {
 		System.out.println("\nList of items. Please select an item by introducing its code.");		
 		products.forEach(p -> System.out.println(p.getCode() + " - " + p.toString()));
 		
+		// We ask the user for input
 		String code = scanner.next();;
 		boolean validCode = false;
+		
+		// We need an atomic reference in order to 
+		// be able to use this variable in the lambda function
+		// that returns the selected product
 		final AtomicReference<String> selectedCode = new AtomicReference<String>();
 		
 		// We keep iterating until the user inputs a valid code
@@ -75,6 +82,7 @@ public class Workshop {
 				if (p.getCode().toLowerCase().equals(code.toLowerCase())) {
 					validCode = true;
 					selectedCode.set(code);
+					break;
 				}
 			}		
 			
@@ -114,8 +122,8 @@ public class Workshop {
 			String answer = scanner.next();
 			
 			while (!(answer.equals("y") || answer.equals("n"))) {
-				answer = scanner.next();
 				System.out.println("y/n");
+				answer = scanner.next();				
 			}
 			
 			if (answer.equals("n")) {
@@ -136,15 +144,23 @@ public class Workshop {
 	 * @return
 	 * 			The ordered units by the user.
 	 */
-	private int unitSelection(Product product) {
-		int availableUnits = product.getUnits();
+	private int unitSelection(Product product) {		
+		System.out.println("\n\nSelect the number of units you want to order");
+		int selectedUnits = 0;
+		boolean incorrectInputType = false;
 		
-		System.out.println("\n\nSelect the number of units you want to order (Available units: " + availableUnits + ")");
-		int selectedUnits = scanner.nextInt();
-		
-		while (selectedUnits <= 0 /* && selectedUnits <= availableUnits */) {
-			System.out.println("Invalid number. Please specify a valid number of units (Available units: " + availableUnits + ")");
-			selectedUnits = scanner.nextInt();
+		while (selectedUnits <= 0) {
+			try {
+				selectedUnits = scanner.nextInt();
+			} catch (InputMismatchException e) {
+				scanner.nextLine();
+				incorrectInputType = true;
+				System.out.println("Invalid input. Please specify a valid number of units");
+			}
+			
+			if (selectedUnits <= 0 && !incorrectInputType) {
+				System.out.println("Invalid input. Please specify a valid number of units");
+			}
 		}
 		
 		return selectedUnits;
