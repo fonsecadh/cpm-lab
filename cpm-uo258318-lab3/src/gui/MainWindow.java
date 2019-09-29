@@ -185,6 +185,11 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					System.exit(0);
+				}
+			});
 			btnCancel.setMnemonic('c');
 			btnCancel.setForeground(Color.WHITE);
 			btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 14));

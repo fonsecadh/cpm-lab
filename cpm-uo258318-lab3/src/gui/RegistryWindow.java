@@ -51,7 +51,7 @@ public class RegistryWindow extends JDialog {
 	 * Create the frame.
 	 */
 	public RegistryWindow() {
-		setTitle("Customer Information");
+		setTitle("McDonald's Spain: Customer Information");
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 653, 355);
 		contentPane = new JPanel();
