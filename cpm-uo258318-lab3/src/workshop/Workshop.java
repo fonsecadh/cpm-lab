@@ -129,8 +129,11 @@ public class Workshop {
 		while (finishedOrdering != true) {
 			Product product = productSelection();
 			int orderedUnits = unitSelection(product);
+			
+			// We add the ordered product and units to the order
 			order.add(product, orderedUnits);
 			
+			// We add the product and its units to the dictionary
 			orderedProducts.put(product, orderedUnits);
 			
 			System.out.println("\n\nWould you like to add more products to your order? y/n");
@@ -179,7 +182,7 @@ public class Workshop {
 		if (answer.equals("y")) {
 			String fileName = FileUtil.setFileName();
 			order.saveOrder(fileName);
-			System.out.println("Order successfuly saved to file: " + fileName);
+			System.out.println("\nOrder successfuly saved to file: " + fileName);
 		}	
 		
 	}
