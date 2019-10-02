@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -14,8 +15,15 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+
+import logic.Menu;
+import logic.Order;
+import logic.Product;
+
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.awt.event.ActionEvent;
+import javax.swing.SpinnerNumberModel;
 
 public class MainWindow extends JFrame {
 
@@ -25,7 +33,7 @@ public class MainWindow extends JFrame {
 	private JLabel lblLogo;
 	private JLabel lblMcdonalds;
 	private JLabel lblProducts;
-	private JComboBox cbProducts;
+	private JComboBox<Product> cbProducts;
 	private JLabel lblUnits;
 	private JSpinner spUnits;
 	private JButton btnAdd;
@@ -34,6 +42,9 @@ public class MainWindow extends JFrame {
 	private JButton btnNext;
 	private JButton btnCancel;
 	private RegistryWindow registryWindow = null;
+	
+	private Menu menu = new Menu();
+	private Order order = new Order();
 	
 
 	/**
@@ -77,6 +88,8 @@ public class MainWindow extends JFrame {
 		contentPane.add(getTfOrderPrice());
 		contentPane.add(getBtnNext());
 		contentPane.add(getBtnCancel());
+		
+		this.getRootPane().setDefaultButton(getBtnNext());
 	}
 	private JLabel getLblLogo() {
 		if (lblLogo == null) {
@@ -104,9 +117,15 @@ public class MainWindow extends JFrame {
 		}
 		return lblProducts;
 	}
-	private JComboBox getCbProducts() {
+	private JComboBox<Product> getCbProducts() {
 		if (cbProducts == null) {
-			cbProducts = new JComboBox();
+			cbProducts = new JComboBox<Product>();
+			cbProducts.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					getSpUnits().setValue(1);
+				}
+			});
+			cbProducts.setModel(new DefaultComboBoxModel<Product>(menu.getProducts()));
 			cbProducts.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			cbProducts.setBounds(34, 246, 297, 21);
 		}
@@ -125,6 +144,7 @@ public class MainWindow extends JFrame {
 	private JSpinner getSpUnits() {
 		if (spUnits == null) {
 			spUnits = new JSpinner();
+			spUnits.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
 			spUnits.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			spUnits.setBounds(382, 240, 55, 31);
 		}
@@ -133,6 +153,14 @@ public class MainWindow extends JFrame {
 	private JButton getBtnAdd() {
 		if (btnAdd == null) {
 			btnAdd = new JButton("Add");
+			btnAdd.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					addProductToOrder();
+					updateShownOrderPrize();
+					enableNextButton();
+					resetSpinner();
+				}
+			});
 			btnAdd.setMnemonic('a');
 			btnAdd.setForeground(Color.WHITE);
 			btnAdd.setBackground(new Color(46, 139, 87));
@@ -141,6 +169,25 @@ public class MainWindow extends JFrame {
 		}
 		return btnAdd;
 	}
+
+	private void addProductToOrder() {
+		Product selectedProduct = (Product) cbProducts.getSelectedItem();
+		int units = (int) spUnits.getValue();
+		order.add(selectedProduct, units);		
+	}	
+	
+	private void updateShownOrderPrize() {
+		getTfOrderPrice().setText(String.valueOf(BigDecimal.valueOf(order.calcTotal()).setScale(2, BigDecimal.ROUND_HALF_UP)));
+	}
+	
+	private void enableNextButton() {
+		getBtnNext().setEnabled(true);
+	}			
+
+	private void resetSpinner() {
+		getSpUnits().setValue(1);
+	}			
+	
 	private JLabel getLblOrderPrice() {
 		if (lblOrderPrice == null) {
 			lblOrderPrice = new JLabel("Order price:");
@@ -153,6 +200,7 @@ public class MainWindow extends JFrame {
 	private JTextField getTfOrderPrice() {
 		if (tfOrderPrice == null) {
 			tfOrderPrice = new JTextField();
+			tfOrderPrice.setToolTipText("This is the total prize of the order.");
 			tfOrderPrice.setEditable(false);
 			tfOrderPrice.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			tfOrderPrice.setBounds(382, 324, 118, 26);
@@ -163,12 +211,12 @@ public class MainWindow extends JFrame {
 	private JButton getBtnNext() {
 		if (btnNext == null) {
 			btnNext = new JButton("Next");
+			btnNext.setEnabled(false);
 			btnNext.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					openRegistryWindow();
 				}
 			});
-			btnNext.setMnemonic('n');
 			btnNext.setForeground(Color.WHITE);
 			btnNext.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			btnNext.setBackground(new Color(46, 139, 87));
@@ -178,7 +226,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	private void openRegistryWindow() {
-		registryWindow = new RegistryWindow();
+		registryWindow = new RegistryWindow(this);
 		registryWindow.setModal(true);
 		registryWindow.setLocationRelativeTo(this);
 		registryWindow.setVisible(true);
@@ -199,5 +247,9 @@ public class MainWindow extends JFrame {
 			btnCancel.setBounds(579, 399, 89, 23);
 		}
 		return btnCancel;
+	}
+
+	public Order getOrder() {
+		return order;
 	}
 }

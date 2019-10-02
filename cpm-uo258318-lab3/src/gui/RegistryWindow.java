@@ -45,12 +45,17 @@ public class RegistryWindow extends JDialog {
 	private final ButtonGroup btnGrOrder = new ButtonGroup();
 	private ConfirmationWindow confirmationWindow = null;
 	
+	private MainWindow mainWindow = new MainWindow();
+	
 	
 	
 	/**
 	 * Create the frame.
+	 * 
+	 * @param mainWindow 
+	 * 			The main window.
 	 */
-	public RegistryWindow() {
+	public RegistryWindow(MainWindow mainWindow) {
 		setTitle("McDonald's Spain: Customer Information");
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 653, 355);
@@ -63,6 +68,10 @@ public class RegistryWindow extends JDialog {
 		contentPane.add(getBtnNext());
 		contentPane.add(getCustomerInfoPanel());
 		contentPane.add(getOrderPanel());
+		
+		this.getRootPane().setDefaultButton(getBtnNext());
+		
+		this.mainWindow = mainWindow;
 	}
 	
 	private JButton getBtnCancel() {
@@ -84,7 +93,6 @@ public class RegistryWindow extends JDialog {
 	private JButton getBtnNext() {
 		if (btnNext == null) {
 			btnNext = new JButton("Next");
-			btnNext.setMnemonic('n');
 			btnNext.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {					
 					if (checkComponents()) {
@@ -101,7 +109,7 @@ public class RegistryWindow extends JDialog {
 	}
 	
 	private void openConfirmationWindow() {
-		confirmationWindow = new ConfirmationWindow();
+		confirmationWindow = new ConfirmationWindow(this);
 		confirmationWindow.setModal(true);
 		confirmationWindow.setLocationRelativeTo(this);
 		confirmationWindow.setVisible(true);		
@@ -266,5 +274,9 @@ public class RegistryWindow extends JDialog {
 			rdbtnTakeAway.setBounds(171, 39, 149, 23);
 		}
 		return rdbtnTakeAway;
+	}
+
+	public MainWindow getMainWindow() {
+		return mainWindow;
 	}
 }

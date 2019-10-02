@@ -7,7 +7,13 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import java.awt.Font;
 import javax.swing.JTextField;
+
+import logic.FileUtil;
+import logic.Order;
+
 import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ConfirmationWindow extends JDialog {
 	
@@ -17,11 +23,20 @@ public class ConfirmationWindow extends JDialog {
 	private JLabel lblYourOrderCode;
 	private JTextField txtCode;
 	private JButton btnFinish;
+	
+	private String code;
+	private Order order;
+	
+	
 
 	/**
 	 * Create the dialog.
+	 * 
+	 * @param registryWindow 
+	 * 			The registry window.
+	 * 
 	 */
-	public ConfirmationWindow() {
+	public ConfirmationWindow(RegistryWindow registryWindow) {
 		setBackground(Color.WHITE);
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ConfirmationWindow.class.getResource("/img/logo.PNG")));
@@ -33,7 +48,18 @@ public class ConfirmationWindow extends JDialog {
 		getContentPane().add(getLblYourOrderCode());
 		getContentPane().add(getTxtCode());
 		getContentPane().add(getBtnFinish());
+		
+		this.getRootPane().setDefaultButton(getBtnFinish());
+		
+		// We initialize the code and order attributes
+		this.code = FileUtil.setFileName();		
+		this.order = registryWindow.getMainWindow().getOrder();	
+		
+		showCode();
+	}
 
+	private void showCode() {
+		getTxtCode().setText(code);
 	}
 
 	private JLabel getLblOk() {
@@ -73,6 +99,12 @@ public class ConfirmationWindow extends JDialog {
 	private JButton getBtnFinish() {
 		if (btnFinish == null) {
 			btnFinish = new JButton("Finish");
+			btnFinish.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					saveOrder();
+					System.exit(0);
+				}
+			});
 			btnFinish.setMnemonic('f');
 			btnFinish.setForeground(Color.WHITE);
 			btnFinish.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -80,5 +112,9 @@ public class ConfirmationWindow extends JDialog {
 			btnFinish.setBounds(428, 196, 89, 23);
 		}
 		return btnFinish;
+	}
+
+	private void saveOrder() {
+		order.saveOrder(code);
 	}
 }
