@@ -13,6 +13,7 @@ import logic.Order;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.awt.event.ActionEvent;
 
 public class ConfirmationWindow extends JDialog {
@@ -26,6 +27,8 @@ public class ConfirmationWindow extends JDialog {
 	
 	private String code;
 	private Order order;
+	private JLabel lblPrize;
+	private JTextField tfPrize;
 	
 	
 
@@ -50,12 +53,19 @@ public class ConfirmationWindow extends JDialog {
 		getContentPane().add(getBtnFinish());
 		
 		this.getRootPane().setDefaultButton(getBtnFinish());
+		getContentPane().add(getLblPrize());
+		getContentPane().add(getTfPrize());
 		
 		// We initialize the code and order attributes
 		this.code = FileUtil.setFileName();		
 		this.order = registryWindow.getMainWindow().getOrder();	
 		
-		showCode();
+		showCode();		
+		showTotalPrize(registryWindow.getMainWindow().getTotalOrderPrize());
+	}
+
+	private void showTotalPrize(float prize) {
+		getTfPrize().setText(String.valueOf(BigDecimal.valueOf(prize).setScale(2, BigDecimal.ROUND_HALF_UP)));
 	}
 
 	private void showCode() {
@@ -116,5 +126,25 @@ public class ConfirmationWindow extends JDialog {
 
 	private void saveOrder() {
 		order.saveOrder(code);
+	}
+	
+	private JLabel getLblPrize() {
+		if (lblPrize == null) {
+			lblPrize = new JLabel("Total prize:");
+			lblPrize.setLabelFor(getTfPrize());
+			lblPrize.setFont(new Font("Dialog", Font.PLAIN, 14));
+			lblPrize.setBounds(80, 163, 135, 34);
+		}
+		return lblPrize;
+	}
+	private JTextField getTfPrize() {
+		if (tfPrize == null) {
+			tfPrize = new JTextField();
+			tfPrize.setFont(new Font("Dialog", Font.PLAIN, 14));
+			tfPrize.setEditable(false);
+			tfPrize.setColumns(10);
+			tfPrize.setBounds(181, 167, 205, 27);
+		}
+		return tfPrize;
 	}
 }

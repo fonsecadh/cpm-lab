@@ -52,7 +52,12 @@ public class MainWindow extends JFrame {
 	private JLabel lblCurrentOrder;
 	private HashMap<Product, Integer> orderedProducts = new HashMap<Product, Integer>();
 	private JLabel lblDiscount;
+	private float totalOrderPrize;
 	
+
+	public JPanel getContentPane() {
+		return contentPane;
+	}
 
 	/**
 	 * Launch the application.
@@ -207,6 +212,8 @@ public class MainWindow extends JFrame {
 		} 
 		
 		getTfOrderPrice().setText(String.valueOf(BigDecimal.valueOf(total).setScale(2, BigDecimal.ROUND_HALF_UP)));
+				
+		this.totalOrderPrize = total;
 		
 	}
 
@@ -338,5 +345,9 @@ public class MainWindow extends JFrame {
 			lblDiscount.setBounds(518, 324, 142, 26);
 		}
 		return lblDiscount;
+	}
+
+	public float getTotalOrderPrize() {
+		return totalOrderPrize;
 	}
 }
