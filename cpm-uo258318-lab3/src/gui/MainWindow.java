@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.util.HashMap;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -12,18 +16,16 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
 import logic.Menu;
 import logic.Order;
 import logic.Product;
-
-import java.awt.event.ActionListener;
-import java.math.BigDecimal;
-import java.awt.event.ActionEvent;
-import javax.swing.SpinnerNumberModel;
 
 public class MainWindow extends JFrame {
 
@@ -45,6 +47,11 @@ public class MainWindow extends JFrame {
 	
 	private Menu menu = new Menu();
 	private Order order = new Order();
+	private JScrollPane spCurrentOrder;
+	private JTextArea taCurrentOrder;
+	private JLabel lblCurrentOrder;
+	private HashMap<Product, Integer> orderedProducts = new HashMap<Product, Integer>();
+	private JLabel lblDiscount;
 	
 
 	/**
@@ -90,6 +97,9 @@ public class MainWindow extends JFrame {
 		contentPane.add(getBtnCancel());
 		
 		this.getRootPane().setDefaultButton(getBtnNext());
+		contentPane.add(getSpCurrentOrder());
+		contentPane.add(getLblCurrentOrder());
+		contentPane.add(getLblDiscount());
 	}
 	private JLabel getLblLogo() {
 		if (lblLogo == null) {
@@ -157,6 +167,7 @@ public class MainWindow extends JFrame {
 				public void actionPerformed(ActionEvent arg0) {
 					addProductToOrder();
 					updateShownOrderPrize();
+					updateCurrentOrderInfo();
 					enableNextButton();
 					resetSpinner();
 				}
@@ -173,11 +184,53 @@ public class MainWindow extends JFrame {
 	private void addProductToOrder() {
 		Product selectedProduct = (Product) cbProducts.getSelectedItem();
 		int units = (int) spUnits.getValue();
-		order.add(selectedProduct, units);		
+		order.add(selectedProduct, units);	
+		
+		Integer currentUnits = orderedProducts.get(selectedProduct);
+		
+		if (currentUnits != null) { // If the product is already in the order
+			// We update the units
+			orderedProducts.replace(selectedProduct, currentUnits, currentUnits + units);
+		} else {
+			// We add the new product to the dictionary
+			orderedProducts.put(selectedProduct, units);
+		}
+		
 	}	
 	
 	private void updateShownOrderPrize() {
-		getTfOrderPrice().setText(String.valueOf(BigDecimal.valueOf(order.calcTotal()).setScale(2, BigDecimal.ROUND_HALF_UP)));
+		float total = order.calcTotal();
+		
+		if (checkIfDiscount() == true) {
+			total *= 0.9;
+			showDiscountLabel();
+		} 
+		
+		getTfOrderPrice().setText(String.valueOf(BigDecimal.valueOf(total).setScale(2, BigDecimal.ROUND_HALF_UP)));
+		
+	}
+
+	private void showDiscountLabel() {
+		getLblDiscount().setVisible(true);
+	}
+
+	private boolean checkIfDiscount() {
+		if (order.calcTotal() >= 50.0) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private void updateCurrentOrderInfo() {
+		StringBuilder sbInfo = new StringBuilder();
+		sbInfo.append("This is the information regarding your order:\n");
+		sbInfo.append("Type - Name - Prize - Units\n");
+		
+		// We append the elements of the dictionary
+		orderedProducts.entrySet().forEach(p -> sbInfo.append(p.getKey() + " - " + p.getValue() + "\n"));
+		
+		getTaCurrentOrder().setText(sbInfo.toString());
 	}
 	
 	private void enableNextButton() {
@@ -251,5 +304,39 @@ public class MainWindow extends JFrame {
 
 	public Order getOrder() {
 		return order;
+	}
+	private JScrollPane getSpCurrentOrder() {
+		if (spCurrentOrder == null) {
+			spCurrentOrder = new JScrollPane();
+			spCurrentOrder.setBounds(34, 313, 297, 114);
+			spCurrentOrder.setViewportView(getTaCurrentOrder());
+		}
+		return spCurrentOrder;
+	}
+	private JTextArea getTaCurrentOrder() {
+		if (taCurrentOrder == null) {
+			taCurrentOrder = new JTextArea();
+			taCurrentOrder.setEditable(false);
+		}
+		return taCurrentOrder;
+	}
+	private JLabel getLblCurrentOrder() {
+		if (lblCurrentOrder == null) {
+			lblCurrentOrder = new JLabel("Current order:");
+			lblCurrentOrder.setLabelFor(getSpCurrentOrder());
+			lblCurrentOrder.setFont(new Font("Dialog", Font.PLAIN, 14));
+			lblCurrentOrder.setDisplayedMnemonic('n');
+			lblCurrentOrder.setBounds(34, 279, 159, 26);
+		}
+		return lblCurrentOrder;
+	}
+	private JLabel getLblDiscount() {
+		if (lblDiscount == null) {
+			lblDiscount = new JLabel("10% Discount!");
+			lblDiscount.setVisible(false);
+			lblDiscount.setFont(new Font("Dialog", Font.BOLD, 14));
+			lblDiscount.setBounds(518, 324, 142, 26);
+		}
+		return lblDiscount;
 	}
 }
