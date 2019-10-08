@@ -61,7 +61,7 @@ public class ConfirmationWindow extends JDialog {
 		this.order = registryWindow.getMainWindow().getOrder();	
 		
 		showCode();		
-		showTotalPrize(registryWindow.getMainWindow().getTotalOrderPrize());
+		showTotalPrize(registryWindow.getMainWindow().getDiscountAdapter().calculateTotalPrize());
 	}
 
 	private void showTotalPrize(float prize) {
