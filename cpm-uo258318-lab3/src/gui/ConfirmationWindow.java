@@ -29,6 +29,7 @@ public class ConfirmationWindow extends JDialog {
 	private Order order;
 	private JLabel lblPrize;
 	private JTextField tfPrize;
+	private RegistryWindow registryWindow;
 	
 	
 
@@ -62,6 +63,8 @@ public class ConfirmationWindow extends JDialog {
 		
 		showCode();		
 		showTotalPrize(registryWindow.getMainWindow().getDiscountAdapter().calculateTotalPrize());
+		
+		this.registryWindow = registryWindow;
 	}
 
 	private void showTotalPrize(float prize) {
@@ -112,7 +115,9 @@ public class ConfirmationWindow extends JDialog {
 			btnFinish.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					saveOrder();
-					System.exit(0);
+					registryWindow.dispose();
+					registryWindow.getMainWindow().initialize();
+					dispose();
 				}
 			});
 			btnFinish.setMnemonic('f');

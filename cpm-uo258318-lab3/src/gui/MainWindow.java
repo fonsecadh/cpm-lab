@@ -12,6 +12,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,6 +21,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import logic.Menu;
@@ -31,7 +33,11 @@ import logic.adapter.products.OrderAdapter;
 import logic.adapter.products.ProductManager;
 
 public class MainWindow extends JFrame {
-
+		
+	// Constants
+	private static final String LOOK_AND_FEEL = 
+			"com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+	
 	
 	// Attributes
 	private JPanel contentPane;
@@ -74,6 +80,11 @@ public class MainWindow extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					JFrame.setDefaultLookAndFeelDecorated(true);
+					JDialog.setDefaultLookAndFeelDecorated(true);
+					
+					UIManager.setLookAndFeel(LOOK_AND_FEEL);
+					
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -120,6 +131,17 @@ public class MainWindow extends JFrame {
 		// We instantiate the ProductManager logic class
 		this.orderAdapter = new ProductManager(order);
 	}	
+	
+	public void initialize() {
+		getCbProducts().setSelectedIndex(0);
+		getSpUnits().setValue(1);
+		getTfOrderPrice().setText("");
+		getBtnNext().setEnabled(false);
+		getTaCurrentOrder().setText("");
+		getLblDiscount().setVisible(false);
+		
+		orderAdapter.initialize();
+	}
 
 	public JPanel getContentPane() {
 		return contentPane;
@@ -287,7 +309,7 @@ public class MainWindow extends JFrame {
 			btnCancel = new JButton("Cancel");
 			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					System.exit(0);
+					initialize();
 				}
 			});
 			btnCancel.setMnemonic('c');

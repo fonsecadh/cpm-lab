@@ -23,4 +23,9 @@ public interface OrderAdapter {
 	 */
 	String getAllProductInformation();
 
+	/**
+	 * Returns to the initial state.
+	 */
+	void initialize();
+
 }

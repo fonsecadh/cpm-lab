@@ -51,4 +51,10 @@ public class ProductManager implements OrderAdapter {
 		return sbInfo.toString();
 	}
 
+	@Override
+	public void initialize() {
+		order.initialize();
+		orderedProducts.clear();
+	}
+
 }

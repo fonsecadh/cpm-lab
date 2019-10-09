@@ -20,11 +20,15 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class RegistryWindow extends JDialog {
 
 	// Constants
 	private static final long serialVersionUID = 1L;
+	private static final int MIN_PASSWD_LENGTH = 8;
+	
 	
 	// Attributes
 	private JPanel contentPane;
@@ -81,6 +85,7 @@ public class RegistryWindow extends JDialog {
 			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					dispose();
+					mainWindow.initialize();
 				}
 			});
 			btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -229,6 +234,15 @@ public class RegistryWindow extends JDialog {
 	private JPasswordField getPfPasswd() {
 		if (pfPasswd == null) {
 			pfPasswd = new JPasswordField();
+			pfPasswd.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (getPfPasswd().getPassword().length < MIN_PASSWD_LENGTH) {
+						JOptionPane.showMessageDialog(contentPane, "The password must be at least " + MIN_PASSWD_LENGTH + " characters");
+						getPfPasswd().grabFocus();
+					}
+				}
+			});
 			pfPasswd.setFont(new Font("Dialog", Font.PLAIN, 14));
 			pfPasswd.setBounds(185, 104, 418, 26);
 		}
