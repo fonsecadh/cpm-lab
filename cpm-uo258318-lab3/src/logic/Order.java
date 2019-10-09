@@ -43,4 +43,8 @@ public class Order {
 	public void initialize() {
 		orderList.clear();
 	}
+	
+	public List<Product> getOrderList() {
+		return this.orderList;
+	}
 }

@@ -1,6 +1,7 @@
 package logic.adapter.products;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import logic.Order;
 import logic.Product;
@@ -55,6 +56,36 @@ public class ProductManager implements OrderAdapter {
 	public void initialize() {
 		order.initialize();
 		orderedProducts.clear();
+	}
+
+	@Override
+	public void deleteProduct(Product item, int units) {		
+		int currentUnits = orderedProducts.get(item);
+		
+		if (currentUnits == units) {
+			order.getOrderList().remove(item);
+			orderedProducts.remove(item);
+		} else {
+			order
+				.getOrderList()
+				.stream()
+				.filter(p -> p.getCode().equals(item.getCode()))
+				.collect(Collectors.toList()).get(0).setUnits(currentUnits - units);;
+			orderedProducts.replace(item, currentUnits, currentUnits - units);
+		}
+	}
+
+	@Override
+	public boolean canDeleteFromProduct(Product item, int units) {
+		if (orderedProducts.get(item) == null) {
+			return false;
+		}
+		
+		if (orderedProducts.get(item) < units) {
+			return false;
+		}
+		
+		return true;
 	}
 
 }

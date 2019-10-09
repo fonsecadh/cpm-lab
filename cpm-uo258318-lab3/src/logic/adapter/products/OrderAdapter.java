@@ -27,5 +27,29 @@ public interface OrderAdapter {
 	 * Returns to the initial state.
 	 */
 	void initialize();
+	
+	/**
+	 * Deletes a given number of units from a product 
+	 * in the order.
+	 * 
+	 * @param item
+	 * 			The product whose units will be subtracted.
+	 * @param units
+	 * 			The number of units to subtract from the product.
+	 */
+	void deleteProduct(Product item, int units);
+
+	/**
+	 * Checks whether we can remove a given amount of units 
+	 * from a product.
+	 * 
+	 * @param item
+	 * 			The product to be checked.
+	 * @param units
+	 * 			The number of units to be removed.
+	 * @return
+	 * 			True if we can remove the specified number of units from the product. False otherwise.
+	 */
+	boolean canDeleteFromProduct(Product item, int units);
 
 }

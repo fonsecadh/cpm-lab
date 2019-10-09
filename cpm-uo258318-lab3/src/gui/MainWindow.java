@@ -31,6 +31,8 @@ import logic.adapter.discount.DiscountAdapter;
 import logic.adapter.discount.McHappyDay;
 import logic.adapter.products.OrderAdapter;
 import logic.adapter.products.ProductManager;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class MainWindow extends JFrame {
 		
@@ -70,6 +72,7 @@ public class MainWindow extends JFrame {
 	 * Business class which expands internal order logic.
 	 */
 	private OrderAdapter orderAdapter;
+	private JButton btnDelete;
 	
 	
 	
@@ -122,6 +125,7 @@ public class MainWindow extends JFrame {
 		contentPane.add(getSpCurrentOrder());
 		contentPane.add(getLblCurrentOrder());
 		contentPane.add(getLblDiscount());
+		contentPane.add(getBtnDelete());
 		
 		this.getRootPane().setDefaultButton(getBtnNext());
 		
@@ -179,6 +183,7 @@ public class MainWindow extends JFrame {
 			cbProducts.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					getSpUnits().setValue(1);
+					isPossibleToDelete();
 				}
 			});
 			cbProducts.setModel(new DefaultComboBoxModel<Product>(menu.getProducts()));
@@ -187,6 +192,7 @@ public class MainWindow extends JFrame {
 		}
 		return cbProducts;
 	}
+	
 	private JLabel getLblUnits() {
 		if (lblUnits == null) {
 			lblUnits = new JLabel("Units:");
@@ -200,6 +206,11 @@ public class MainWindow extends JFrame {
 	private JSpinner getSpUnits() {
 		if (spUnits == null) {
 			spUnits = new JSpinner();
+			spUnits.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent arg0) {
+					isPossibleToDelete();
+				}
+			});
 			spUnits.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
 			spUnits.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			spUnits.setBounds(382, 240, 55, 31);
@@ -215,6 +226,7 @@ public class MainWindow extends JFrame {
 					updateShownOrderPrize();
 					updateCurrentOrderInfo();
 					enableNextButton();
+					isPossibleToDelete();
 					resetSpinner();
 				}
 			});
@@ -353,7 +365,35 @@ public class MainWindow extends JFrame {
 			lblDiscount.setBounds(518, 324, 142, 26);
 		}
 		return lblDiscount;
+	}	
+	
+	private JButton getBtnDelete() {
+		if (btnDelete == null) {
+			btnDelete = new JButton("Delete");
+			btnDelete.setEnabled(false);
+			btnDelete.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					deleteFromProduct();
+					updateShownOrderPrize();
+					updateCurrentOrderInfo();
+					resetSpinner();
+				}			
+			});
+			btnDelete.setMnemonic('l');
+			btnDelete.setForeground(Color.WHITE);
+			btnDelete.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			btnDelete.setBackground(new Color(46, 139, 87));
+			btnDelete.setBounds(560, 240, 101, 31);
+		}
+		return btnDelete;
 	}
+	
+	private void deleteFromProduct() {
+		Product selectedProduct = (Product) cbProducts.getSelectedItem();
+		int units = (int) spUnits.getValue();		
+		orderAdapter.deleteProduct(selectedProduct, units);			
+	}
+
 
 	public Order getOrder() {
 		return order;
@@ -361,6 +401,17 @@ public class MainWindow extends JFrame {
 
 	public DiscountAdapter getDiscountAdapter() {
 		return discountAdapter;
-	}	
-	
+	}
+
+	private void isPossibleToDelete() {
+		Product selectedProduct = (Product) cbProducts.getSelectedItem();
+		int units = (int) spUnits.getValue();
+		
+		if (orderAdapter.canDeleteFromProduct(selectedProduct, units)) {
+			getBtnDelete().setEnabled(true);
+		} else {
+			getBtnDelete().setEnabled(false);
+		}
+	}
+
 }
