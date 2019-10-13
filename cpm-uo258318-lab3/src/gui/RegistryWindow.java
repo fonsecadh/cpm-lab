@@ -293,4 +293,12 @@ public class RegistryWindow extends JDialog {
 	public MainWindow getMainWindow() {
 		return mainWindow;
 	}
+	
+	public JTextField getNameAndSurname() {
+		return this.txtNameSurname;
+	}
+	
+	public JComboBox getBirthDate() {
+		return this.cbBirthrate;
+	}
 }

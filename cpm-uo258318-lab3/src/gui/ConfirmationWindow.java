@@ -130,7 +130,12 @@ public class ConfirmationWindow extends JDialog {
 	}
 
 	private void saveOrder() {
-		order.saveOrder(code);
+		StringBuilder userInfo = new StringBuilder();
+		String fullUserName = registryWindow.getNameAndSurname().getText();
+		int birthDate = (Integer) registryWindow.getBirthDate().getSelectedItem();
+		userInfo.append("Name: " + fullUserName + "\n");
+		userInfo.append("Date of birth: " + birthDate);
+		order.saveOrderWithCustomHeader(code, userInfo.toString());
 	}
 	
 	private JLabel getLblPrize() {

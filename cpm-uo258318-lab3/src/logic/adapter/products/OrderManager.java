@@ -1,12 +1,11 @@
 package logic.adapter.products;
 
 import java.util.HashMap;
-import java.util.stream.Collectors;
 
 import logic.Order;
 import logic.Product;
 
-public class ProductManager implements OrderAdapter {
+public class OrderManager implements OrderAdapter {
 	
 	// Attributes
 	private Order order;
@@ -19,7 +18,7 @@ public class ProductManager implements OrderAdapter {
 	 * @param order
 	 * 			The order to manage.
 	 */
-	public ProductManager(Order order) {
+	public OrderManager(Order order) {
 		this.order = order;
 		this.orderedProducts = new HashMap<Product, Integer>();
 	}
@@ -59,18 +58,14 @@ public class ProductManager implements OrderAdapter {
 	}
 
 	@Override
-	public void deleteProduct(Product item, int units) {		
+	public void deleteProduct(Product item, int units) {	
+		order.remove(item, units);
+		
 		int currentUnits = orderedProducts.get(item);
 		
 		if (currentUnits == units) {
-			order.getOrderList().remove(item);
 			orderedProducts.remove(item);
 		} else {
-			order
-				.getOrderList()
-				.stream()
-				.filter(p -> p.getCode().equals(item.getCode()))
-				.collect(Collectors.toList()).get(0).setUnits(currentUnits - units);;
 			orderedProducts.replace(item, currentUnits, currentUnits - units);
 		}
 	}

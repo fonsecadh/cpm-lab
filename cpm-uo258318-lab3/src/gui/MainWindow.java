@@ -30,7 +30,7 @@ import logic.Product;
 import logic.adapter.discount.DiscountAdapter;
 import logic.adapter.discount.McHappyDay;
 import logic.adapter.products.OrderAdapter;
-import logic.adapter.products.ProductManager;
+import logic.adapter.products.OrderManager;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
@@ -86,7 +86,8 @@ public class MainWindow extends JFrame {
 					JFrame.setDefaultLookAndFeelDecorated(true);
 					JDialog.setDefaultLookAndFeelDecorated(true);
 					
-					UIManager.setLookAndFeel(LOOK_AND_FEEL);
+					// Nimbus Look and Feel is not working on my GNU/Linux system				
+//					UIManager.setLookAndFeel(LOOK_AND_FEEL);
 					
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);
@@ -132,8 +133,8 @@ public class MainWindow extends JFrame {
 		// We instantiate the McHappyDay logic class
 		this.discountAdapter = new McHappyDay(order);
 		
-		// We instantiate the ProductManager logic class
-		this.orderAdapter = new ProductManager(order);
+		// We instantiate the OrderManager logic class
+		this.orderAdapter = new OrderManager(order);
 	}	
 	
 	public void initialize() {
@@ -376,6 +377,7 @@ public class MainWindow extends JFrame {
 					deleteFromProduct();
 					updateShownOrderPrize();
 					updateCurrentOrderInfo();
+					isPossibleToDelete();
 					resetSpinner();
 				}			
 			});

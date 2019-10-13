@@ -40,6 +40,20 @@ public abstract class FileUtil {
 			new RuntimeException("I/O Error.");
 		}
 	}
+	
+	public static void saveContentToFile(String fileName, String toBeWritten) {
+		try {
+			BufferedWriter file = new BufferedWriter(new FileWriter("files/" + fileName + ".dat"));			
+			file.write(toBeWritten);
+			file.close();
+		}
+
+		catch (FileNotFoundException fnfe) {
+			System.out.println("The file could not be saved.");
+		} catch (IOException ioe) {
+			new RuntimeException("I/O Error.");
+		}
+	}
 
 	public static String setFileName() {
 		String code = "";
