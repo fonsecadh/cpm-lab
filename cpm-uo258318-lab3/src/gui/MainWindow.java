@@ -6,8 +6,13 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -15,14 +20,22 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import logic.Menu;
 import logic.Order;
@@ -31,8 +44,6 @@ import logic.adapter.discount.DiscountAdapter;
 import logic.adapter.discount.McHappyDay;
 import logic.adapter.products.OrderAdapter;
 import logic.adapter.products.OrderManager;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 public class MainWindow extends JFrame {
 		
@@ -73,6 +84,21 @@ public class MainWindow extends JFrame {
 	 */
 	private OrderAdapter orderAdapter;
 	private JButton btnDelete;
+	private JMenuBar menuBar;
+	private JMenu mnOrder;
+	private JMenuItem mntmNew;
+	private JSeparator separator1Order;
+	private JMenuItem mntmExit;
+	private JMenu mnHelp;
+	private JMenuItem mntmContents;
+	private JSeparator separator1Help;
+	private JMenuItem mntmAbout;
+	private JLabel lblProductPicture;
+	private JPanel panelFilter;
+	private JButton btnHamburguers;
+	private JButton btnDrinks;
+	private JButton btnComplements;
+	private JButton btnDesserts;
 	
 	
 	
@@ -87,7 +113,11 @@ public class MainWindow extends JFrame {
 					JDialog.setDefaultLookAndFeelDecorated(true);
 					
 					// Nimbus Look and Feel is not working on my GNU/Linux system				
-//					UIManager.setLookAndFeel(LOOK_AND_FEEL);
+					try {
+						UIManager.setLookAndFeel(LOOK_AND_FEEL);
+					} catch (Exception e) {
+						System.err.println("Nimbus look and feel not available.");
+					}
 					
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);
@@ -106,7 +136,8 @@ public class MainWindow extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/img/logo.PNG")));
 		setTitle("McDonald's Spain");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 698, 462);
+		setBounds(100, 100, 1128, 649);
+		setJMenuBar(getMenuBar_1());
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -129,12 +160,18 @@ public class MainWindow extends JFrame {
 		contentPane.add(getBtnDelete());
 		
 		this.getRootPane().setDefaultButton(getBtnNext());
+		contentPane.add(getLblProductPicture());
+		contentPane.add(getPanelFilter());
 		
 		// We instantiate the McHappyDay logic class
 		this.discountAdapter = new McHappyDay(order);
 		
 		// We instantiate the OrderManager logic class
 		this.orderAdapter = new OrderManager(order);
+		
+		// We show the picture for the first product
+		// at start.
+		showPicture();
 	}	
 	
 	public void initialize() {
@@ -156,7 +193,7 @@ public class MainWindow extends JFrame {
 		if (lblLogo == null) {
 			lblLogo = new JLabel("");
 			lblLogo.setIcon(new ImageIcon(MainWindow.class.getResource("/img/logo.PNG")));
-			lblLogo.setBounds(10, 11, 204, 160);
+			lblLogo.setBounds(323, 11, 204, 160);
 		}
 		return lblLogo;
 	}
@@ -164,7 +201,7 @@ public class MainWindow extends JFrame {
 		if (lblMcdonalds == null) {
 			lblMcdonalds = new JLabel("McDonald's");
 			lblMcdonalds.setFont(new Font("Arial", Font.BOLD, 36));
-			lblMcdonalds.setBounds(257, 56, 245, 90);
+			lblMcdonalds.setBounds(560, 57, 245, 90);
 		}
 		return lblMcdonalds;
 	}
@@ -174,7 +211,7 @@ public class MainWindow extends JFrame {
 			lblProducts.setDisplayedMnemonic('r');
 			lblProducts.setLabelFor(getCbProducts());
 			lblProducts.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblProducts.setBounds(34, 209, 85, 26);
+			lblProducts.setBounds(310, 240, 85, 26);
 		}
 		return lblProducts;
 	}
@@ -183,13 +220,13 @@ public class MainWindow extends JFrame {
 			cbProducts = new JComboBox<Product>();
 			cbProducts.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					getSpUnits().setValue(1);
+					showPicture();
 					isPossibleToDelete();
 				}
 			});
 			cbProducts.setModel(new DefaultComboBoxModel<Product>(menu.getProducts()));
 			cbProducts.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			cbProducts.setBounds(34, 246, 297, 21);
+			cbProducts.setBounds(310, 277, 297, 21);
 		}
 		return cbProducts;
 	}
@@ -200,7 +237,7 @@ public class MainWindow extends JFrame {
 			lblUnits.setDisplayedMnemonic('u');
 			lblUnits.setLabelFor(getSpUnits());
 			lblUnits.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblUnits.setBounds(382, 209, 85, 26);
+			lblUnits.setBounds(658, 240, 85, 26);
 		}
 		return lblUnits;
 	}
@@ -214,7 +251,7 @@ public class MainWindow extends JFrame {
 			});
 			spUnits.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
 			spUnits.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			spUnits.setBounds(382, 240, 55, 31);
+			spUnits.setBounds(658, 271, 55, 31);
 		}
 		return spUnits;
 	}
@@ -235,7 +272,7 @@ public class MainWindow extends JFrame {
 			btnAdd.setForeground(Color.WHITE);
 			btnAdd.setBackground(new Color(46, 139, 87));
 			btnAdd.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			btnAdd.setBounds(449, 240, 101, 31);
+			btnAdd.setBounds(725, 271, 101, 31);
 		}
 		return btnAdd;
 	}
@@ -278,7 +315,7 @@ public class MainWindow extends JFrame {
 			lblOrderPrice = new JLabel("Order price:");
 			lblOrderPrice.setLabelFor(getTfOrderPrice());
 			lblOrderPrice.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblOrderPrice.setBounds(382, 287, 85, 26);
+			lblOrderPrice.setBounds(658, 318, 85, 26);
 		}
 		return lblOrderPrice;
 	}
@@ -288,7 +325,7 @@ public class MainWindow extends JFrame {
 			tfOrderPrice.setToolTipText("This is the total prize of the order.");
 			tfOrderPrice.setEditable(false);
 			tfOrderPrice.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			tfOrderPrice.setBounds(382, 324, 118, 26);
+			tfOrderPrice.setBounds(658, 355, 118, 26);
 			tfOrderPrice.setColumns(10);
 		}
 		return tfOrderPrice;
@@ -305,7 +342,7 @@ public class MainWindow extends JFrame {
 			btnNext.setForeground(Color.WHITE);
 			btnNext.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			btnNext.setBackground(new Color(46, 139, 87));
-			btnNext.setBounds(483, 399, 89, 23);
+			btnNext.setBounds(912, 550, 89, 23);
 		}
 		return btnNext;
 	}
@@ -329,14 +366,14 @@ public class MainWindow extends JFrame {
 			btnCancel.setForeground(Color.WHITE);
 			btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			btnCancel.setBackground(new Color(220, 20, 60));
-			btnCancel.setBounds(579, 399, 89, 23);
+			btnCancel.setBounds(1008, 550, 89, 23);
 		}
 		return btnCancel;
 	}
 	private JScrollPane getSpCurrentOrder() {
 		if (spCurrentOrder == null) {
 			spCurrentOrder = new JScrollPane();
-			spCurrentOrder.setBounds(34, 313, 297, 114);
+			spCurrentOrder.setBounds(310, 344, 297, 114);
 			spCurrentOrder.setViewportView(getTaCurrentOrder());
 		}
 		return spCurrentOrder;
@@ -354,7 +391,7 @@ public class MainWindow extends JFrame {
 			lblCurrentOrder.setLabelFor(getSpCurrentOrder());
 			lblCurrentOrder.setFont(new Font("Dialog", Font.PLAIN, 14));
 			lblCurrentOrder.setDisplayedMnemonic('n');
-			lblCurrentOrder.setBounds(34, 279, 159, 26);
+			lblCurrentOrder.setBounds(310, 310, 159, 26);
 		}
 		return lblCurrentOrder;
 	}
@@ -363,7 +400,7 @@ public class MainWindow extends JFrame {
 			lblDiscount = new JLabel("10% Discount!");
 			lblDiscount.setVisible(false);
 			lblDiscount.setFont(new Font("Dialog", Font.BOLD, 14));
-			lblDiscount.setBounds(518, 324, 142, 26);
+			lblDiscount.setBounds(794, 355, 142, 26);
 		}
 		return lblDiscount;
 	}	
@@ -385,7 +422,7 @@ public class MainWindow extends JFrame {
 			btnDelete.setForeground(Color.WHITE);
 			btnDelete.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			btnDelete.setBackground(new Color(46, 139, 87));
-			btnDelete.setBounds(560, 240, 101, 31);
+			btnDelete.setBounds(836, 271, 101, 31);
 		}
 		return btnDelete;
 	}
@@ -415,5 +452,180 @@ public class MainWindow extends JFrame {
 			getBtnDelete().setEnabled(false);
 		}
 	}
-
+	private JMenuBar getMenuBar_1() {
+		if (menuBar == null) {
+			menuBar = new JMenuBar();
+			menuBar.add(getMnOrder());
+			menuBar.add(getMnHelp());
+		}
+		return menuBar;
+	}
+	private JMenu getMnOrder() {
+		if (mnOrder == null) {
+			mnOrder = new JMenu("Order");
+			mnOrder.setMnemonic('o');
+			mnOrder.add(getMntmNew());
+			mnOrder.add(getSeparator1Order());
+			mnOrder.add(getMntmExit());
+		}
+		return mnOrder;
+	}
+	private JMenuItem getMntmNew() {
+		if (mntmNew == null) {
+			mntmNew = new JMenuItem("New");
+			mntmNew.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					initialize();
+				}
+			});
+			mntmNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
+			mntmNew.setMnemonic('n');
+		}
+		return mntmNew;
+	}
+	private JSeparator getSeparator1Order() {
+		if (separator1Order == null) {
+			separator1Order = new JSeparator();
+		}
+		return separator1Order;
+	}
+	private JMenuItem getMntmExit() {
+		if (mntmExit == null) {
+			mntmExit = new JMenuItem("Exit");
+			mntmExit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.exit(0);
+				}
+			});
+			mntmExit.setMnemonic('x');
+		}
+		return mntmExit;
+	}
+	private JMenu getMnHelp() {
+		if (mnHelp == null) {
+			mnHelp = new JMenu("Help");
+			mnHelp.setMnemonic('h');
+			mnHelp.add(getMntmContents());
+			mnHelp.add(getSeparator1Help());
+			mnHelp.add(getMntmAbout());
+		}
+		return mnHelp;
+	}
+	private JMenuItem getMntmContents() {
+		if (mntmContents == null) {
+			mntmContents = new JMenuItem("Contents");
+			mntmContents.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					JOptionPane.showMessageDialog(contentPane, "Not currently available", "Contents", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
+			mntmContents.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+			mntmContents.setMnemonic('t');
+		}
+		return mntmContents;
+	}
+	private JSeparator getSeparator1Help() {
+		if (separator1Help == null) {
+			separator1Help = new JSeparator();
+		}
+		return separator1Help;
+	}
+	private JMenuItem getMntmAbout() {
+		if (mntmAbout == null) {
+			mntmAbout = new JMenuItem("About");
+			mntmAbout.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					JOptionPane.showMessageDialog(contentPane, 
+							"Developed for the Human-Computer Interaction subject. "
+							+ "\n\nApplication name: McDonald's Spain "
+							+ "\nAuthor: Hugo Fonseca Díaz (UO258318) "
+							+ "\nLicense: GPLv3", 
+							"Contents", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
+			mntmAbout.setMnemonic('b');
+		}
+		return mntmAbout;
+	}
+	private JLabel getLblProductPicture() {
+		if (lblProductPicture == null) {
+			lblProductPicture = new JLabel("");
+			lblProductPicture.setBounds(625, 403, 245, 139);
+		}
+		return lblProductPicture;
+	}
+	
+	private void showPicture() {
+		spUnits.setValue(((SpinnerNumberModel) spUnits.getModel()).getMinimum());
+		String pictureName = "/img/" + ((Product) cbProducts.getSelectedItem()).getCode() + ".png";
+		lblProductPicture.setIcon(new ImageIcon(MainWindow.class.getResource(pictureName)));
+	}
+	private JPanel getPanelFilter() {
+		if (panelFilter == null) {
+			panelFilter = new JPanel();
+			panelFilter.setBackground(Color.WHITE);
+			panelFilter.setBounds(10, 21, 159, 536);
+			panelFilter.setLayout(null);
+			panelFilter.add(getBtnHamburguers());
+			panelFilter.add(getBtnDrinks());
+			panelFilter.add(getBtnComplements());
+			panelFilter.add(getBtnDesserts());
+		}
+		return panelFilter;
+	}
+	private JButton getBtnHamburguers() {
+		if (btnHamburguers == null) {
+			btnHamburguers = new JButton("Hamburguers");
+			btnHamburguers.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<Product> products = Arrays.asList(menu.getProducts());
+					// TODO: Product class should have a getter for the type attribute
+					products.parallelStream().filter(p -> p.getCode().startsWith("H"));
+				}
+			});
+			btnHamburguers.setMnemonic('h');
+			btnHamburguers.setBackground(Color.WHITE);
+			btnHamburguers.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnHamburguers.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnHamburguers.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Hamburguesa.png")));
+			btnHamburguers.setBounds(10, 11, 136, 121);
+		}
+		return btnHamburguers;
+	}
+	private JButton getBtnDrinks() {
+		if (btnDrinks == null) {
+			btnDrinks = new JButton("Drinks");
+			btnDrinks.setMnemonic('d');
+			btnDrinks.setBackground(Color.WHITE);
+			btnDrinks.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnDrinks.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnDrinks.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Bebida.png")));
+			btnDrinks.setBounds(10, 143, 136, 121);
+		}
+		return btnDrinks;
+	}
+	private JButton getBtnComplements() {
+		if (btnComplements == null) {
+			btnComplements = new JButton("Complements");
+			btnComplements.setMnemonic('m');
+			btnComplements.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Complemento.png")));
+			btnComplements.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnComplements.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnComplements.setBackground(Color.WHITE);
+			btnComplements.setBounds(10, 272, 136, 121);
+		}
+		return btnComplements;
+	}
+	private JButton getBtnDesserts() {
+		if (btnDesserts == null) {
+			btnDesserts = new JButton("Desserts");
+			btnDesserts.setMnemonic('s');
+			btnDesserts.setBackground(Color.WHITE);
+			btnDesserts.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnDesserts.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnDesserts.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Postre.png")));
+			btnDesserts.setBounds(10, 404, 136, 121);
+		}
+		return btnDesserts;
+	}
 }
