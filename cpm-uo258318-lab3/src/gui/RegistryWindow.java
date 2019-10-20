@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.event.FocusAdapter;
@@ -74,6 +76,10 @@ public class RegistryWindow extends JDialog {
 		contentPane.add(getOrderPanel());
 		
 		this.getRootPane().setDefaultButton(getBtnNext());
+		this.getRootPane().registerKeyboardAction(
+				e -> { dispose(); mainWindow.initialize(); }, 
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		this.mainWindow = mainWindow;
 	}

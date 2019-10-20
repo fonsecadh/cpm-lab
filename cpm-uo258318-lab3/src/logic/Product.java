@@ -51,6 +51,10 @@ public class Product {
 	public void setUnits(int units) {
 		this.units = units;
 	}
+	
+	public String getType() {
+		return type;
+	}
 
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
@@ -59,7 +63,7 @@ public class Product {
 		buffer.append(this.name);
 		buffer.append(" - ");
 		buffer.append(this.price);
-		buffer.append(" €");
+		buffer.append(" â‚¬");
 		if (this.units != 0) {
 			buffer.append(" (");
 			buffer.append(this.units);
@@ -67,4 +71,5 @@ public class Product {
 		}
 		return buffer.toString();
 	}
+	
 }

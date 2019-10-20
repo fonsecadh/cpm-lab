@@ -52,10 +52,10 @@ public class ConfirmationWindow extends JDialog {
 		getContentPane().add(getLblYourOrderCode());
 		getContentPane().add(getTxtCode());
 		getContentPane().add(getBtnFinish());
-		
-		this.getRootPane().setDefaultButton(getBtnFinish());
 		getContentPane().add(getLblPrize());
 		getContentPane().add(getTfPrize());
+		
+		this.getRootPane().setDefaultButton(getBtnFinish());
 		
 		// We initialize the code and order attributes
 		this.code = FileUtil.setFileName();		
@@ -120,7 +120,6 @@ public class ConfirmationWindow extends JDialog {
 					dispose();
 				}
 			});
-			btnFinish.setMnemonic('f');
 			btnFinish.setForeground(Color.WHITE);
 			btnFinish.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			btnFinish.setBackground(new Color(46, 139, 87));

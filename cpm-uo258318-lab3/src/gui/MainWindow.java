@@ -11,12 +11,14 @@ import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -40,6 +42,7 @@ import javax.swing.event.ChangeListener;
 import logic.Menu;
 import logic.Order;
 import logic.Product;
+import logic.ProductType;
 import logic.adapter.discount.DiscountAdapter;
 import logic.adapter.discount.McHappyDay;
 import logic.adapter.products.OrderAdapter;
@@ -97,7 +100,7 @@ public class MainWindow extends JFrame {
 	private JPanel panelFilter;
 	private JButton btnHamburguers;
 	private JButton btnDrinks;
-	private JButton btnComplements;
+	private JButton btnSides;
 	private JButton btnDesserts;
 	
 	
@@ -157,11 +160,15 @@ public class MainWindow extends JFrame {
 		contentPane.add(getSpCurrentOrder());
 		contentPane.add(getLblCurrentOrder());
 		contentPane.add(getLblDiscount());
-		contentPane.add(getBtnDelete());
-		
-		this.getRootPane().setDefaultButton(getBtnNext());
+		contentPane.add(getBtnDelete());		
 		contentPane.add(getLblProductPicture());
 		contentPane.add(getPanelFilter());
+		
+		this.getRootPane().setDefaultButton(getBtnNext());
+		this.getRootPane().registerKeyboardAction(
+				e -> initialize(), 
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		// We instantiate the McHappyDay logic class
 		this.discountAdapter = new McHappyDay(order);
@@ -175,6 +182,7 @@ public class MainWindow extends JFrame {
 	}	
 	
 	public void initialize() {
+		getCbProducts().setModel(new DefaultComboBoxModel<Product>(menu.getProducts()));
 		getCbProducts().setSelectedIndex(0);
 		getSpUnits().setValue(1);
 		getTfOrderPrice().setText("");
@@ -560,6 +568,7 @@ public class MainWindow extends JFrame {
 		String pictureName = "/img/" + ((Product) cbProducts.getSelectedItem()).getCode() + ".png";
 		lblProductPicture.setIcon(new ImageIcon(MainWindow.class.getResource(pictureName)));
 	}
+	
 	private JPanel getPanelFilter() {
 		if (panelFilter == null) {
 			panelFilter = new JPanel();
@@ -568,7 +577,7 @@ public class MainWindow extends JFrame {
 			panelFilter.setLayout(null);
 			panelFilter.add(getBtnHamburguers());
 			panelFilter.add(getBtnDrinks());
-			panelFilter.add(getBtnComplements());
+			panelFilter.add(getBtnSides());
 			panelFilter.add(getBtnDesserts());
 		}
 		return panelFilter;
@@ -578,9 +587,7 @@ public class MainWindow extends JFrame {
 			btnHamburguers = new JButton("Hamburguers");
 			btnHamburguers.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					List<Product> products = Arrays.asList(menu.getProducts());
-					// TODO: Product class should have a getter for the type attribute
-					products.parallelStream().filter(p -> p.getCode().startsWith("H"));
+					filteringProducts(ProductType.BURGER);
 				}
 			});
 			btnHamburguers.setMnemonic('h');
@@ -595,6 +602,11 @@ public class MainWindow extends JFrame {
 	private JButton getBtnDrinks() {
 		if (btnDrinks == null) {
 			btnDrinks = new JButton("Drinks");
+			btnDrinks.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					filteringProducts(ProductType.DRINK);
+				}
+			});
 			btnDrinks.setMnemonic('d');
 			btnDrinks.setBackground(Color.WHITE);
 			btnDrinks.setHorizontalTextPosition(AbstractButton.CENTER);
@@ -604,21 +616,31 @@ public class MainWindow extends JFrame {
 		}
 		return btnDrinks;
 	}
-	private JButton getBtnComplements() {
-		if (btnComplements == null) {
-			btnComplements = new JButton("Complements");
-			btnComplements.setMnemonic('m');
-			btnComplements.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Complemento.png")));
-			btnComplements.setHorizontalTextPosition(AbstractButton.CENTER);
-			btnComplements.setVerticalTextPosition(AbstractButton.BOTTOM);
-			btnComplements.setBackground(Color.WHITE);
-			btnComplements.setBounds(10, 272, 136, 121);
+	private JButton getBtnSides() {
+		if (btnSides == null) {
+			btnSides = new JButton("Sides");
+			btnSides.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					filteringProducts(ProductType.SIDE);
+				}
+			});
+			btnSides.setMnemonic('i');
+			btnSides.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Complemento.png")));
+			btnSides.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnSides.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnSides.setBackground(Color.WHITE);
+			btnSides.setBounds(10, 272, 136, 121);
 		}
-		return btnComplements;
+		return btnSides;
 	}
 	private JButton getBtnDesserts() {
 		if (btnDesserts == null) {
 			btnDesserts = new JButton("Desserts");
+			btnDesserts.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					filteringProducts(ProductType.DESSERT);
+				}
+			});
 			btnDesserts.setMnemonic('s');
 			btnDesserts.setBackground(Color.WHITE);
 			btnDesserts.setHorizontalTextPosition(AbstractButton.CENTER);
@@ -627,5 +649,39 @@ public class MainWindow extends JFrame {
 			btnDesserts.setBounds(10, 404, 136, 121);
 		}
 		return btnDesserts;
+	}
+	
+
+	/**
+	 * Refills the combo box filtering the products 
+	 * by means of the type given.
+	 *
+	 * @param type
+	 * 			The product type acting as a filter.
+	 */
+	private void filteringProducts(ProductType type) {
+		// We convert the array of products to a List<Product>
+		List<Product> products = Arrays.asList(menu.getProducts());
+		
+		// We filter and collect a List<Product> with the filtered products
+		List<Product> filteredProducts = products
+			.parallelStream()
+			.filter(p -> p.getType().toLowerCase().equals(
+					type.toString().toLowerCase()))
+			.collect(Collectors.toList());
+		
+		// We make an auxiliary array with size of the filtered products list
+		// so we can convert that list to an array in the next line of code
+		Product[] aux = new Product[filteredProducts.size()];	
+		
+		// We set the filtered products to the combo box model
+		cbProducts.setModel(new DefaultComboBoxModel<Product>(
+				filteredProducts.toArray(aux)));
+		
+		// We reset the spinner
+		spUnits.setValue(1);
+		
+		// We show the picture for the first element of the new model
+		showPicture();
 	}
 }
