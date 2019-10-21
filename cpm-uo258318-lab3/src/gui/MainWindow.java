@@ -47,6 +47,8 @@ import logic.adapter.discount.DiscountAdapter;
 import logic.adapter.discount.McHappyDay;
 import logic.adapter.products.OrderAdapter;
 import logic.adapter.products.OrderManager;
+import logic.filter.McDonnaldProductFilter;
+import logic.filter.ProductFilter;
 
 public class MainWindow extends JFrame {
 		
@@ -69,23 +71,10 @@ public class MainWindow extends JFrame {
 	private JButton btnNext;
 	private JButton btnCancel;
 	private RegistryWindow registryWindow = null;
-	
-	private Menu menu = new Menu();
-	private Order order = new Order();
 	private JScrollPane spCurrentOrder;
 	private JTextArea taCurrentOrder;
 	private JLabel lblCurrentOrder;
 	private JLabel lblDiscount;	
-		
-	/**
-	 * Business class which manages the discount logic.
-	 */
-	private DiscountAdapter discountAdapter;
-	
-	/**
-	 * Business class which expands internal order logic.
-	 */
-	private OrderAdapter orderAdapter;
 	private JButton btnDelete;
 	private JMenuBar menuBar;
 	private JMenu mnOrder;
@@ -98,10 +87,28 @@ public class MainWindow extends JFrame {
 	private JMenuItem mntmAbout;
 	private JLabel lblProductPicture;
 	private JPanel panelFilter;
-	private JButton btnHamburguers;
+	private JButton btnHamburgers;
 	private JButton btnDrinks;
 	private JButton btnSides;
 	private JButton btnDesserts;
+	
+	private Menu menu = new Menu();
+	private Order order = new Order();	
+		
+	/**
+	 * Business class which manages the discount logic.
+	 */
+	private DiscountAdapter discountAdapter;
+	
+	/**
+	 * Business class which expands internal order logic.
+	 */
+	private OrderAdapter orderAdapter;
+	
+	/**
+	 * Business class which manages product filtering logic.
+	 */
+	private ProductFilter productFilter;
 	
 	
 	
@@ -175,6 +182,9 @@ public class MainWindow extends JFrame {
 		
 		// We instantiate the OrderManager logic class
 		this.orderAdapter = new OrderManager(order);
+		
+		// We instantiate the McDonnaldProductFilter logic class
+		this.productFilter = new McDonnaldProductFilter(menu.getProducts());
 		
 		// We show the picture for the first product
 		// at start.
@@ -575,29 +585,29 @@ public class MainWindow extends JFrame {
 			panelFilter.setBackground(Color.WHITE);
 			panelFilter.setBounds(10, 21, 159, 536);
 			panelFilter.setLayout(null);
-			panelFilter.add(getBtnHamburguers());
+			panelFilter.add(getBtnHamburgers());
 			panelFilter.add(getBtnDrinks());
 			panelFilter.add(getBtnSides());
 			panelFilter.add(getBtnDesserts());
 		}
 		return panelFilter;
 	}
-	private JButton getBtnHamburguers() {
-		if (btnHamburguers == null) {
-			btnHamburguers = new JButton("Hamburguers");
-			btnHamburguers.addActionListener(new ActionListener() {
+	private JButton getBtnHamburgers() {
+		if (btnHamburgers == null) {
+			btnHamburgers = new JButton("Hamburgers");
+			btnHamburgers.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					filteringProducts(ProductType.BURGER);
 				}
 			});
-			btnHamburguers.setMnemonic('h');
-			btnHamburguers.setBackground(Color.WHITE);
-			btnHamburguers.setHorizontalTextPosition(AbstractButton.CENTER);
-			btnHamburguers.setVerticalTextPosition(AbstractButton.BOTTOM);
-			btnHamburguers.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Hamburguesa.png")));
-			btnHamburguers.setBounds(10, 11, 136, 121);
+			btnHamburgers.setMnemonic('h');
+			btnHamburgers.setBackground(Color.WHITE);
+			btnHamburgers.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnHamburgers.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnHamburgers.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Hamburguesa.png")));
+			btnHamburgers.setBounds(10, 11, 136, 121);
 		}
-		return btnHamburguers;
+		return btnHamburgers;
 	}
 	private JButton getBtnDrinks() {
 		if (btnDrinks == null) {
@@ -654,29 +664,15 @@ public class MainWindow extends JFrame {
 
 	/**
 	 * Refills the combo box filtering the products 
-	 * by means of the type given.
+	 * by means of the given type.
 	 *
 	 * @param type
 	 * 			The product type acting as a filter.
 	 */
-	private void filteringProducts(ProductType type) {
-		// We convert the array of products to a List<Product>
-		List<Product> products = Arrays.asList(menu.getProducts());
-		
-		// We filter and collect a List<Product> with the filtered products
-		List<Product> filteredProducts = products
-			.parallelStream()
-			.filter(p -> p.getType().toLowerCase().equals(
-					type.toString().toLowerCase()))
-			.collect(Collectors.toList());
-		
-		// We make an auxiliary array with size of the filtered products list
-		// so we can convert that list to an array in the next line of code
-		Product[] aux = new Product[filteredProducts.size()];	
-		
+	private void filteringProducts(ProductType type) {				
 		// We set the filtered products to the combo box model
 		cbProducts.setModel(new DefaultComboBoxModel<Product>(
-				filteredProducts.toArray(aux)));
+				productFilter.filterProductByType(type)));
 		
 		// We reset the spinner
 		spUnits.setValue(1);
