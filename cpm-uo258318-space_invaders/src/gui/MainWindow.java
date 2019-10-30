@@ -6,23 +6,25 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
-import java.util.Arrays;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import logic.Game;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame {
 
@@ -42,11 +44,18 @@ public class MainWindow extends JFrame {
 	private JButton btnCell06;
 	private JButton btnCell07;
 	private JButton btnCell08;
+	private ActionListener cellActionListener;
+	
 	
 	/**
 	 * Business class that manages the logic of the game.
 	 */
 	private Game game = new Game();
+	private JMenuBar menuBarGame;
+	private JMenu mnGame;
+	private JMenuItem mntmNewGame;
+	private JSeparator separator;
+	private JMenuItem mntmExit;
 	
 	
 
@@ -76,6 +85,7 @@ public class MainWindow extends JFrame {
 		setTitle("Space Invaders");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 846, 508);
+		setJMenuBar(getMenuBarGame());
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.BLACK);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -91,6 +101,15 @@ public class MainWindow extends JFrame {
 		
 		enableBoard(false);
 		txtScore.setText(String.valueOf(game.getScore()));
+		
+		// Creating an instance of the cell action listener
+		this.cellActionListener = new CellActionListener();
+		
+		// Adding the cell action listener to the buttons
+		for (Component com : getPnBoard().getComponents()) {
+			JButton cell = (JButton) com;
+			cell.addActionListener(cellActionListener);
+		}
 	}
 	private JButton getBtnDice() {
 		if (btnDice == null) {
@@ -178,6 +197,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell01() {
 		if (btnCell01 == null) {
 			btnCell01 = new JButton("");
+			btnCell01.setActionCommand("0");
 			btnCell01.setBackground(Color.BLACK);
 			btnCell01.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -186,6 +206,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell02() {
 		if (btnCell02 == null) {
 			btnCell02 = new JButton("");
+			btnCell02.setActionCommand("1");
 			btnCell02.setBackground(Color.BLACK);
 			btnCell02.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -194,6 +215,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell03() {
 		if (btnCell03 == null) {
 			btnCell03 = new JButton("");
+			btnCell03.setActionCommand("2");
 			btnCell03.setBackground(Color.BLACK);
 			btnCell03.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -202,6 +224,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell04() {
 		if (btnCell04 == null) {
 			btnCell04 = new JButton("");
+			btnCell04.setActionCommand("3");
 			btnCell04.setBackground(Color.BLACK);
 			btnCell04.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -210,6 +233,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell05() {
 		if (btnCell05 == null) {
 			btnCell05 = new JButton("");
+			btnCell05.setActionCommand("4");
 			btnCell05.setBackground(Color.BLACK);
 			btnCell05.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -218,6 +242,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell06() {
 		if (btnCell06 == null) {
 			btnCell06 = new JButton("");
+			btnCell06.setActionCommand("5");
 			btnCell06.setBackground(Color.BLACK);
 			btnCell06.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -226,6 +251,7 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell07() {
 		if (btnCell07 == null) {
 			btnCell07 = new JButton("");
+			btnCell07.setActionCommand("6");
 			btnCell07.setBackground(Color.BLACK);
 			btnCell07.setBorder(new LineBorder(Color.BLUE, 2));
 		}
@@ -234,10 +260,58 @@ public class MainWindow extends JFrame {
 	private JButton getBtnCell08() {
 		if (btnCell08 == null) {
 			btnCell08 = new JButton("");
+			btnCell08.setActionCommand("7");
 			btnCell08.setBackground(Color.BLACK);
 			btnCell08.setBorder(new LineBorder(Color.BLUE, 2));
 		}
 		return btnCell08;
+	}
+	
+	private JMenuBar getMenuBarGame() {
+		if (menuBarGame == null) {
+			menuBarGame = new JMenuBar();
+			menuBarGame.add(getMnGame());
+		}
+		return menuBarGame;
+	}
+	private JMenu getMnGame() {
+		if (mnGame == null) {
+			mnGame = new JMenu("Game");
+			mnGame.add(getMntmNewGame());
+			mnGame.add(getMntmExit());
+			mnGame.add(getSeparator());
+		}
+		return mnGame;
+	}
+	private JMenuItem getMntmNewGame() {
+		if (mntmNewGame == null) {
+			mntmNewGame = new JMenuItem("New");
+			mntmNewGame.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					initialize();
+				}
+			});
+			mntmNewGame.setMnemonic('n');
+		}
+		return mntmNewGame;
+	}
+	private JSeparator getSeparator() {
+		if (separator == null) {
+			separator = new JSeparator();
+		}
+		return separator;
+	}
+	private JMenuItem getMntmExit() {
+		if (mntmExit == null) {
+			mntmExit = new JMenuItem("Exit");
+			mntmExit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.exit(0);
+				}
+			});
+			mntmExit.setMnemonic('e');
+		}
+		return mntmExit;
 	}
 	
 	
@@ -285,14 +359,50 @@ public class MainWindow extends JFrame {
 		paint(position);
 		
 		if (game.isGameOver()) {
-			JOptionPane.showMessageDialog(this, "Game Over!", "Space Invaders", 
-					JOptionPane.INFORMATION_MESSAGE);
+			StringBuilder sb = new StringBuilder();
+			
+			if (game.getScore() < 3000) {
+				sb.append("You lost!\n");
+				sb.append("Game Over!");
+				JOptionPane.showMessageDialog(this, sb.toString(), "Space Invaders", 
+						JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				sb.append("You won!\n");
+				sb.append("Game Over!");
+				JOptionPane.showMessageDialog(this, sb.toString(), "Space Invaders", 
+						JOptionPane.INFORMATION_MESSAGE);
+			}
 			enableBoard(false);
+			discoverBoard();
 		}
 	}
 	
+	private void discoverBoard() {
+		for (int i = 0; i < getPnBoard().getComponents().length; i++) {
+			paint(i);
+		}
+	}
+
 	private void shoot(int position) {
 		game.shoot(position);
 	}	
+
+	private void initialize() {
+		game.initialize();
+	}
 	
+	
+	
+	// Custom listeners
+	
+	private class CellActionListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JButton cell = (JButton) e.getSource();
+			shoot(Integer.valueOf(cell.getActionCommand()));
+			updateStateOfTheGame(Integer.valueOf(cell.getActionCommand()));
+		}
+		
+	}
 }

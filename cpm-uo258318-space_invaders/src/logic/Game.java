@@ -2,11 +2,16 @@ package logic;
 
 public class Game {
 
+	// Constants
 	public static final int maxShots = 4;
+	
+	// Attributes
 	int score;
 	int shots;
 	private Board board;
-	private boolean invaderFound;
+	private boolean gameOver;
+	
+	
 
 	public Board getBoard() {
 		return board;
@@ -24,15 +29,16 @@ public class Game {
 
 	public void shoot(int i) {
 		shots--;
-		if (board.getCells()[i] instanceof Invader) {
-			((Invader) board.getCells()[i]).setErased(true);
-			invaderFound = true;
-		}
 		score = score + board.getCells()[i].getScore();
+		
+		if (board.getCells()[i] instanceof GameElement) {
+			((GameElement) board.getCells()[i]).setErased(true);
+			((GameElement) board.getCells()[i]).action(this);
+		}
 	}
 
 	public boolean isGameOver() {
-		return (invaderFound || shots == 0);
+		return (gameOver || shots == 0);
 	}
 
 	public int getScore() {
@@ -49,5 +55,17 @@ public class Game {
 
 	private void setShots(int shots) {
 		this.shots = shots;
+	}
+	
+	public void setGameOver(boolean gameOver) {
+		this.gameOver = gameOver;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+	
+	public void increaseScore(int amount) {
+		this.score += amount;
 	}
 }
