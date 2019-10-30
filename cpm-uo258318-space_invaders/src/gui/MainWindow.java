@@ -44,18 +44,18 @@ public class MainWindow extends JFrame {
 	private JButton btnCell06;
 	private JButton btnCell07;
 	private JButton btnCell08;
-	private ActionListener cellActionListener;
-	
-	
-	/**
-	 * Business class that manages the logic of the game.
-	 */
-	private Game game = new Game();
 	private JMenuBar menuBarGame;
 	private JMenu mnGame;
 	private JMenuItem mntmNewGame;
 	private JSeparator separator;
 	private JMenuItem mntmExit;
+	
+	private ActionListener cellActionListener;	
+	
+	/**
+	 * Business class that manages the logic of the game.
+	 */
+	private Game game = new Game();
 	
 	
 
@@ -389,10 +389,27 @@ public class MainWindow extends JFrame {
 
 	private void initialize() {
 		game.initialize();
+		enableBoard(false);
+		btnDice.setEnabled(true);
+		pnShots.removeAll();
+		txtScore.setText(String.valueOf(game.getScore()));
+		hideBoard();
+		repaint();
 	}
 	
+	private void hideBoard() {
+		for (int i = 0; i < getPnBoard().getComponents().length; i++) {
+			hide(i);
+		}
+	}	
 	
-	
+	private void hide(int position) {
+		((JButton) pnBoard.getComponent(position)).setIcon(null);
+		((JButton) pnBoard.getComponent(position)).setDisabledIcon(null);
+	}
+
+
+
 	// Custom listeners
 	
 	private class CellActionListener implements ActionListener {

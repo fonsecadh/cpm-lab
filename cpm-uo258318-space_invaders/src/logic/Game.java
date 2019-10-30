@@ -25,6 +25,7 @@ public class Game {
 		board = new Board();
 		score = 800;
 		shots = 0;
+		gameOver = false;
 	}
 
 	public void shoot(int i) {
