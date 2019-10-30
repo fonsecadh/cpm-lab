@@ -1,4 +1,6 @@
-package logic;
+package logic.gmelement;
+
+import logic.Game;
 
 public class Invader extends GameElement {
 	

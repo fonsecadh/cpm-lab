@@ -1,5 +1,7 @@
 package logic;
 
+import logic.gmelement.GameElement;
+
 public class Game {
 
 	// Constants
@@ -17,12 +19,12 @@ public class Game {
 		return board;
 	}
 
-	public Game() {
-		initialize();
+	public Game(GameElement... gameElements) {
+		initialize(gameElements);
 	}
 
-	public void initialize() {
-		board = new Board();
+	public void initialize(GameElement... gameElements) {
+		board = new Board(gameElements);
 		score = 800;
 		shots = 0;
 		gameOver = false;

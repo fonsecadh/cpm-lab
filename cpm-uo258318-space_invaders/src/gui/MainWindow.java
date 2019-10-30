@@ -8,9 +8,14 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -21,10 +26,16 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import logic.Board;
 import logic.Game;
+import logic.gmelement.GameElement;
+import logic.gmelement.Invader;
+import logic.gmelement.Meteorite;
+import logic.gmelement.factory.GameElementFactoryImpl;
 
 public class MainWindow extends JFrame {
 
@@ -36,26 +47,29 @@ public class MainWindow extends JFrame {
 	private JTextField txtScore;
 	private JPanel pnShots;
 	private JPanel pnBoard;
-	private JButton btnCell01;
-	private JButton btnCell02;
-	private JButton btnCell03;
-	private JButton btnCell04;
-	private JButton btnCell05;
-	private JButton btnCell06;
-	private JButton btnCell07;
-	private JButton btnCell08;
 	private JMenuBar menuBarGame;
 	private JMenu mnGame;
 	private JMenuItem mntmNewGame;
 	private JSeparator separator;
 	private JMenuItem mntmExit;
 	
-	private ActionListener cellActionListener;	
+	private ProcessDrag pd = new ProcessDrag();
+	private ProcessButton pb = new ProcessButton();
 	
 	/**
 	 * Business class that manages the logic of the game.
 	 */
-	private Game game = new Game();
+	private Game game;
+	
+	/**
+	 * Factory class that manages game element creation.
+	 */
+	private GameElementFactoryImpl geFactory;
+	
+	/**
+	 * Game elements.
+	 */
+	private GameElement[] gameElements;
 	
 	
 
@@ -99,18 +113,28 @@ public class MainWindow extends JFrame {
 		contentPane.add(getPnShots());
 		contentPane.add(getPnBoard());
 		
+		// We create the game element factory
+		this.geFactory = new GameElementFactoryImpl();
+		
+		// We create the game elements
+		this.gameElements = new GameElement[] { geFactory.createInvader(), geFactory.createMeteorite() };
+		
+		// We create the game
+		this.game = new Game(gameElements);
+		
 		enableBoard(false);
 		txtScore.setText(String.valueOf(game.getScore()));
 		
-		// Creating an instance of the cell action listener
-		this.cellActionListener = new CellActionListener();
-		
-		// Adding the cell action listener to the buttons
-		for (Component com : getPnBoard().getComponents()) {
-			JButton cell = (JButton) com;
-			cell.addActionListener(cellActionListener);
+		createButtons();
+	}
+
+	private void createButtons() {
+		// Adding the buttons to the pnBoard
+		for (int i = 0; i < Board.DIM; i++) {
+			pnBoard.add(createButton(i));
 		}
 	}
+	
 	private JButton getBtnDice() {
 		if (btnDice == null) {
 			btnDice = new JButton("");
@@ -183,88 +207,8 @@ public class MainWindow extends JFrame {
 			pnBoard.setBackground(Color.BLUE);
 			pnBoard.setBounds(10, 309, 810, 128);
 			pnBoard.setLayout(new GridLayout(1, 0, 0, 0));
-			pnBoard.add(getBtnCell01());
-			pnBoard.add(getBtnCell02());
-			pnBoard.add(getBtnCell03());
-			pnBoard.add(getBtnCell04());
-			pnBoard.add(getBtnCell05());
-			pnBoard.add(getBtnCell06());
-			pnBoard.add(getBtnCell07());
-			pnBoard.add(getBtnCell08());
 		}
 		return pnBoard;
-	}
-	private JButton getBtnCell01() {
-		if (btnCell01 == null) {
-			btnCell01 = new JButton("");
-			btnCell01.setActionCommand("0");
-			btnCell01.setBackground(Color.BLACK);
-			btnCell01.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell01;
-	}
-	private JButton getBtnCell02() {
-		if (btnCell02 == null) {
-			btnCell02 = new JButton("");
-			btnCell02.setActionCommand("1");
-			btnCell02.setBackground(Color.BLACK);
-			btnCell02.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell02;
-	}
-	private JButton getBtnCell03() {
-		if (btnCell03 == null) {
-			btnCell03 = new JButton("");
-			btnCell03.setActionCommand("2");
-			btnCell03.setBackground(Color.BLACK);
-			btnCell03.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell03;
-	}
-	private JButton getBtnCell04() {
-		if (btnCell04 == null) {
-			btnCell04 = new JButton("");
-			btnCell04.setActionCommand("3");
-			btnCell04.setBackground(Color.BLACK);
-			btnCell04.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell04;
-	}
-	private JButton getBtnCell05() {
-		if (btnCell05 == null) {
-			btnCell05 = new JButton("");
-			btnCell05.setActionCommand("4");
-			btnCell05.setBackground(Color.BLACK);
-			btnCell05.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell05;
-	}
-	private JButton getBtnCell06() {
-		if (btnCell06 == null) {
-			btnCell06 = new JButton("");
-			btnCell06.setActionCommand("5");
-			btnCell06.setBackground(Color.BLACK);
-			btnCell06.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell06;
-	}
-	private JButton getBtnCell07() {
-		if (btnCell07 == null) {
-			btnCell07 = new JButton("");
-			btnCell07.setActionCommand("6");
-			btnCell07.setBackground(Color.BLACK);
-			btnCell07.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell07;
-	}
-	private JButton getBtnCell08() {
-		if (btnCell08 == null) {
-			btnCell08 = new JButton("");
-			btnCell08.setActionCommand("7");
-			btnCell08.setBackground(Color.BLACK);
-			btnCell08.setBorder(new LineBorder(Color.BLUE, 2));
-		}
-		return btnCell08;
 	}
 	
 	private JMenuBar getMenuBarGame() {
@@ -325,6 +269,9 @@ public class MainWindow extends JFrame {
 		JLabel shot = new JLabel();
 		shot.setBorder(new LineBorder(Color.GREEN));
 		shot.setIcon(ImageFactory.getImage());
+		shot.addMouseListener(pd);
+		shot.setTransferHandler(new TransferHandler("foreground"));
+		shot.setForeground(Color.BLUE);
 		return shot;
 	}
 	
@@ -385,10 +332,13 @@ public class MainWindow extends JFrame {
 
 	private void shoot(int position) {
 		game.shoot(position);
+		updateStateOfTheGame(position);
 	}	
 
 	private void initialize() {
-		game.initialize();
+		game.initialize(gameElements);
+		pnBoard.removeAll();
+		createButtons();
 		enableBoard(false);
 		btnDice.setEnabled(true);
 		pnShots.removeAll();
@@ -407,10 +357,20 @@ public class MainWindow extends JFrame {
 		((JButton) pnBoard.getComponent(position)).setIcon(null);
 		((JButton) pnBoard.getComponent(position)).setDisabledIcon(null);
 	}
+	
+	private JButton createButton(int position) {
+		JButton btn = new JButton("");
+		btn.setBackground(Color.BLACK);	
+		btn.setBorder(new LineBorder(Color.BLUE, 2));
+		btn.setActionCommand(String.valueOf(position));		
+		btn.addPropertyChangeListener(pb);
+		btn.setTransferHandler(new TransferHandler("foreground"));
+		return btn;
+	}
 
 
 
-	// Custom listeners
+	// Custom event handlers
 	
 	private class CellActionListener implements ActionListener {
 
@@ -418,8 +378,28 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			JButton cell = (JButton) e.getSource();
 			shoot(Integer.valueOf(cell.getActionCommand()));
-			updateStateOfTheGame(Integer.valueOf(cell.getActionCommand()));
 		}
 		
 	}
+	
+	private class ProcessDrag extends MouseAdapter {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			JComponent c = (JComponent) e.getSource();
+			TransferHandler handler = c.getTransferHandler();
+			handler.exportAsDrag(c, e, TransferHandler.COPY);
+		}
+	}
+	
+	private class ProcessButton implements PropertyChangeListener {
+		@Override
+		public void propertyChange(PropertyChangeEvent e) {
+			if (e.getPropertyName().equals("foreground")) {
+				JButton btn = (JButton) e.getSource();
+				Integer position = Integer.parseInt(btn.getActionCommand());
+				shoot(position);				
+			}
+		}
+	}
+ 	
 }

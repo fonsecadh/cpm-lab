@@ -3,8 +3,8 @@ package gui;
 import javax.swing.ImageIcon;
 
 import logic.Cell;
-import logic.GameElement;
 import logic.Space;
+import logic.gmelement.GameElement;
 
 public class ImageFactory {
 

@@ -1,14 +1,16 @@
 package logic;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import logic.gmelement.GameElement;
 
 public class Board {
 
 	// Constants
 	public static final int DIM = 8;
-	public static final int INVADERS = 1;
-	public static final int METEORITES = 1;
 	
 	// Attributes
 	private Cell[] cells;
@@ -16,43 +18,29 @@ public class Board {
 	
 	
 
-	public Board() {
+	public Board(GameElement... gameElements) { 
+		if (gameElements.length > DIM) {
+			throw new IllegalArgumentException("Too many game elements. Board is not big enough.");
+		}
+		
 		cells = new Cell[DIM];
 		for (int i = 0; i < DIM; i++) {
 			cells[i] = new Space(i);	
 		}
-		createGameElements();
+		createGameElements(gameElements);
 	}
 
-	private void createGameElements() {
-		createInvaders();		
-		createMeteorites();
+	private void createGameElements(GameElement... gameElements) {
+		new ArrayList<GameElement>(Arrays.asList(gameElements)).forEach(ge -> createGameElement(ge));
 	}
 
-	private void createMeteorites() {
-		int meteoCounter = METEORITES;
-		
-		while (meteoCounter > 0) {
-			int meteoritePosition = (int) (Math.random() * DIM);
-			while (posGameElements.get(meteoritePosition) != null) {
-				meteoritePosition = (int) (Math.random() * DIM);
-			}
-			cells[meteoritePosition] = new Meteorite(meteoritePosition);
-			meteoCounter--;
+	private void createGameElement(GameElement ge) {
+		int pos = (int) (Math.random() * DIM);
+		while (posGameElements.get(pos) != null) {
+			pos = (int) (Math.random() * DIM);
 		}
-	}
-
-	private void createInvaders() {
-		int invCounter = INVADERS;		
-		
-		while (invCounter > 0) {
-			int invaderPosition = (int) (Math.random() * DIM);
-			while (posGameElements.get(invaderPosition) != null) {
-				invaderPosition = (int) (Math.random() * DIM);
-			}
-			cells[invaderPosition] = new Invader(invaderPosition);
-			invCounter--;
-		}
+		ge.setPosition(pos);
+		cells[pos] = ge;
 	}
 
 	public Cell[] getCells() {

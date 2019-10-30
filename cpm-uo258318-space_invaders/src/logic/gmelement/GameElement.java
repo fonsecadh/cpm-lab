@@ -1,4 +1,7 @@
-package logic;
+package logic.gmelement;
+
+import logic.Cell;
+import logic.Game;
 
 public abstract class GameElement extends Cell {
 	
