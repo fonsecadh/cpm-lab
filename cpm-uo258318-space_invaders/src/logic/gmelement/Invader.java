@@ -11,6 +11,8 @@ public class Invader extends GameElement {
 
 	public Invader() {
 		// Empty constructor
+		setScore(3000);
+		setErased(false);
 	}
 	
 	public Invader(int position) {

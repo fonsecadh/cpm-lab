@@ -1,6 +1,7 @@
 package logic.gmelement;
 
 import logic.Game;
+import logic.GameState;
 
 public class Meteorite extends GameElement {
 	
@@ -11,6 +12,7 @@ public class Meteorite extends GameElement {
 
 	public Meteorite() {
 		// Empty constructor
+		setErased(false);
 	}
 	
 	public Meteorite(int position) {
@@ -21,8 +23,10 @@ public class Meteorite extends GameElement {
 
 	@Override
 	public void action(Game game) {
-		game.setScore(0);
-		game.setGameOver(true);
+		if (!game.getState().equals(GameState.SHIELDED)) {
+			game.setScore(0);
+			game.setGameOver(true);
+		}
 	}
 
 	@Override

@@ -1,9 +1,16 @@
 package logic;
 
 public class Dice {
+	
+	// Attributes
+	private Game game;
 
-	public static int launch() {
-		return ((int) (Math.random() * Game.maxShots) + 1);
+	public Dice(Game game) {
+		this.game = game;
+	}
+
+	public int launch() {
+		return ((int) (Math.random() * game.getMaxShots()) + 1);
 	}
 
 }

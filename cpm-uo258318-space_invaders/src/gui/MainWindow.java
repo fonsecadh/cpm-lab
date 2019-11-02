@@ -32,13 +32,17 @@ import javax.swing.border.LineBorder;
 
 import logic.Board;
 import logic.Game;
+import logic.SpaceInvadersUtils;
 import logic.gmelement.GameElement;
-import logic.gmelement.Invader;
-import logic.gmelement.Meteorite;
+import logic.gmelement.factory.GameElementFactory;
 import logic.gmelement.factory.GameElementFactoryImpl;
 
 public class MainWindow extends JFrame {
 
+	// Constants
+	private static final long serialVersionUID = 1L;
+	
+	// Attributes
 	private JPanel contentPane;
 	private JButton btnDice;
 	private JLabel lblSpaceShip;
@@ -51,7 +55,9 @@ public class MainWindow extends JFrame {
 	private JMenu mnGame;
 	private JMenuItem mntmNewGame;
 	private JSeparator separator;
+	private JSeparator separator_1;
 	private JMenuItem mntmExit;
+	private JMenuItem mntmShots;
 	
 	private ProcessDrag pd = new ProcessDrag();
 	private ProcessButton pb = new ProcessButton();
@@ -62,14 +68,14 @@ public class MainWindow extends JFrame {
 	private Game game;
 	
 	/**
-	 * Factory class that manages game element creation.
-	 */
-	private GameElementFactoryImpl geFactory;
-	
-	/**
 	 * Game elements.
 	 */
 	private GameElement[] gameElements;
+
+	/**
+	 * Current max shots of the game.
+	 */
+	private int currentMaxShots;
 	
 	
 
@@ -80,7 +86,11 @@ public class MainWindow extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainWindow frame = new MainWindow();
+					GameElementFactory factory = new GameElementFactoryImpl();
+					MainWindow frame = new MainWindow(
+							factory.createInvader(), 
+							factory.createMeteorite(), 
+							factory.createShield());
 					frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -92,8 +102,11 @@ public class MainWindow extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @param gameElement3 
+	 * @param gameElement2 
+	 * @param gameElement 
 	 */
-	public MainWindow() {
+	public MainWindow(GameElement... gameElements) {
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/img/invader.jpg")));
 		setTitle("Space Invaders");
@@ -113,14 +126,11 @@ public class MainWindow extends JFrame {
 		contentPane.add(getPnShots());
 		contentPane.add(getPnBoard());
 		
-		// We create the game element factory
-		this.geFactory = new GameElementFactoryImpl();
-		
 		// We create the game elements
-		this.gameElements = new GameElement[] { geFactory.createInvader(), geFactory.createMeteorite() };
+		this.gameElements = gameElements;
 		
 		// We create the game
-		this.game = new Game(gameElements);
+		this.game = new Game(this.gameElements);
 		
 		enableBoard(false);
 		txtScore.setText(String.valueOf(game.getScore()));
@@ -196,7 +206,7 @@ public class MainWindow extends JFrame {
 		if (pnShots == null) {
 			pnShots = new JPanel();
 			pnShots.setBackground(Color.BLACK);
-			pnShots.setBounds(113, 158, 368, 95);
+			pnShots.setBounds(54, 158, 512, 95);
 		}
 		return pnShots;
 	}
@@ -222,8 +232,10 @@ public class MainWindow extends JFrame {
 		if (mnGame == null) {
 			mnGame = new JMenu("Game");
 			mnGame.add(getMntmNewGame());
-			mnGame.add(getMntmExit());
 			mnGame.add(getSeparator());
+			mnGame.add(getMntmShots());
+			mnGame.add(getSeparator_1());
+			mnGame.add(getMntmExit());
 		}
 		return mnGame;
 	}
@@ -245,6 +257,12 @@ public class MainWindow extends JFrame {
 		}
 		return separator;
 	}
+	private JSeparator getSeparator_1() {
+		if (separator_1 == null) {
+			separator_1 = new JSeparator();
+		}
+		return separator_1;
+	}
 	private JMenuItem getMntmExit() {
 		if (mntmExit == null) {
 			mntmExit = new JMenuItem("Exit");
@@ -256,6 +274,19 @@ public class MainWindow extends JFrame {
 			mntmExit.setMnemonic('e');
 		}
 		return mntmExit;
+	}
+
+	private JMenuItem getMntmShots() {
+		if (mntmShots == null) {
+			mntmShots = new JMenuItem("Shots");
+			mntmShots.setMnemonic('s');
+			mntmShots.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					maxShotsInput();
+				}
+			});
+		}
+		return mntmShots;
 	}
 	
 	
@@ -337,6 +368,7 @@ public class MainWindow extends JFrame {
 
 	private void initialize() {
 		game.initialize(gameElements);
+		game.setMaxShots(currentMaxShots);
 		pnBoard.removeAll();
 		createButtons();
 		enableBoard(false);
@@ -368,10 +400,58 @@ public class MainWindow extends JFrame {
 		return btn;
 	}
 
+	private void maxShotsInput() {
+		String input = getMaxShotsFromUser();
+		
+		if (input != null) {
+			// Restart game to reflect changes
+			initialize();
+
+			// Process input
+			game.setMaxShots(Integer.valueOf(input));
+			
+			// Save max shots for future games
+			this.currentMaxShots = Integer.valueOf(input);
+		}
+	}
+
+	private String getMaxShotsFromUser() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Please, select the maximum number of shots for the game.\n");
+		sb.append("Value must be between 2 and 6.");
+		String input = null;
+		
+		// Input validation
+		boolean validInput = false;
+		
+		while (!validInput) {			
+			input = JOptionPane.showInputDialog(this, sb.toString(), "Space Invaders", 
+				JOptionPane.QUESTION_MESSAGE);
+			
+			if (input == null) {
+				break;
+			}
+			
+			if (input.isEmpty() || !SpaceInvadersUtils.isNumeric(input)) {
+				JOptionPane.showMessageDialog(this, "Input must be a positive number!", 
+						"Space Invaders", 
+						JOptionPane.ERROR_MESSAGE);
+			} else if (Integer.valueOf(input) > 6 || Integer.valueOf(input) < 2) {
+				JOptionPane.showMessageDialog(this, "Input must be in range!", 
+						"Space Invaders", 
+						JOptionPane.ERROR_MESSAGE);
+			} else {
+				validInput = true;
+			}
+		}
+		return input;
+	}
+
 
 
 	// Custom event handlers
 	
+	@SuppressWarnings("unused")
 	private class CellActionListener implements ActionListener {
 
 		@Override
@@ -401,5 +481,5 @@ public class MainWindow extends JFrame {
 			}
 		}
 	}
- 	
+	
 }

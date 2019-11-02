@@ -3,15 +3,15 @@ package logic;
 import logic.gmelement.GameElement;
 
 public class Game {
-
-	// Constants
-	public static final int maxShots = 4;
 	
 	// Attributes
 	int score;
 	int shots;
 	private Board board;
 	private boolean gameOver;
+	private GameState state;
+	private int maxShots;
+	private Dice dice;
 	
 	
 
@@ -27,7 +27,10 @@ public class Game {
 		board = new Board(gameElements);
 		score = 800;
 		shots = 0;
+		maxShots = 4;
 		gameOver = false;
+		state = GameState.DEFAULT;
+		dice = new Dice(this);
 	}
 
 	public void shoot(int i) {
@@ -49,11 +52,19 @@ public class Game {
 	}
 
 	public void launch() {
-		setShots(Dice.launch());
+		setShots(dice.launch());
 	}
 
 	public int getShots() {
 		return shots;
+	}
+	
+	public GameState getState() {
+		return state;
+	}
+	
+	public int getMaxShots() {
+		return maxShots;
 	}
 
 	private void setShots(int shots) {
@@ -70,5 +81,13 @@ public class Game {
 	
 	public void increaseScore(int amount) {
 		this.score += amount;
+	}
+
+	public void setState(GameState state) {
+		this.state = state;
+	}
+	
+	public void setMaxShots(int shots) {
+		this.maxShots = shots;
 	}
 }
