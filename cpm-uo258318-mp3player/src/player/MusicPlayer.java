@@ -34,7 +34,7 @@ public class MusicPlayer {
 		try {
 			basicPlayer.setGain(vol / volMax);
 		} catch (BasicPlayerException e) {
-			System.err.println("Something went wrong");
+			// Ignore
 		}
 	}
 }
