@@ -11,8 +11,11 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 
+import javax.help.HelpBroker;
+import javax.help.HelpSet;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,7 +44,7 @@ import player.MusicPlayer;
 import player.MyFile;
 
 public class MainWindow extends JFrame {
-	
+
 	// Attributes
 	private JPanel contentPane;
 	private JPanel pnNorth;
@@ -81,17 +84,15 @@ public class MainWindow extends JFrame {
 	private JMenuItem mntmContents;
 	private JSeparator separator_1;
 	private JMenuItem mntmAbout;
-	
+
 	private DefaultListModel model1 = null;
 	private DefaultListModel model2 = null;
-	
+
 	private JFileChooser selector = null;
-	
+
 	private MusicPlayer mp = new MusicPlayer();
-	
+
 	private Font digitalFont = null;
-	
-	
 
 	/**
 	 * Launch the application.
@@ -104,7 +105,7 @@ public class MainWindow extends JFrame {
 					props.put("logoString", "");
 					HiFiLookAndFeel.setCurrentTheme(props);
 					UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");
-					
+
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -130,8 +131,31 @@ public class MainWindow extends JFrame {
 		setContentPane(contentPane);
 		contentPane.add(getPnNorth(), BorderLayout.NORTH);
 		contentPane.add(getPnCenter(), BorderLayout.CENTER);
+		loadHelp();
 	}
-	
+
+	private void loadHelp() {
+		URL hsURL;
+		HelpSet hs;
+
+		try {
+			File fichero = new File("help/ayuda.hs");
+			hsURL = fichero.toURI().toURL();
+			hs = new HelpSet(null, hsURL);
+		}
+
+		catch (Exception e) {
+			System.out.println("Help not found");
+			return;
+		}
+
+		HelpBroker hb = hs.createHelpBroker();
+
+		hb.enableHelpKey(getRootPane(), "intro", hs);
+		hb.enableHelpOnButton(getMntmContents(), "intro", hs);
+		hb.enableHelp(getListlLibrary(), "add", hs);
+	}
+
 	private void loadFont() {
 		try {
 			InputStream myStream = new BufferedInputStream(new FileInputStream("TTF/DS-DIGIB.ttf"));
@@ -151,6 +175,7 @@ public class MainWindow extends JFrame {
 		}
 		return pnNorth;
 	}
+
 	private JLabel getLblLogo() {
 		if (lblLogo == null) {
 			lblLogo = new JLabel("");
@@ -159,6 +184,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblLogo;
 	}
+
 	private JSlider getSlVolume() {
 		if (slVolume == null) {
 			slVolume = new JSlider();
@@ -175,6 +201,7 @@ public class MainWindow extends JFrame {
 		}
 		return slVolume;
 	}
+
 	private JPanel getPnVol() {
 		if (pnVol == null) {
 			pnVol = new JPanel();
@@ -183,13 +210,15 @@ public class MainWindow extends JFrame {
 		}
 		return pnVol;
 	}
+
 	private JLabel getLblVol() {
 		if (lblVol == null) {
-			lblVol = new JLabel("Vol:");			
+			lblVol = new JLabel("Vol:");
 			lblVol.setFont(digitalFont.deriveFont(Font.PLAIN, 50));
 		}
 		return lblVol;
 	}
+
 	private JTextField getTxtVol() {
 		if (txtVol == null) {
 			txtVol = new JTextField();
@@ -201,6 +230,7 @@ public class MainWindow extends JFrame {
 		}
 		return txtVol;
 	}
+
 	private JPanel getPnCenter() {
 		if (pnCenter == null) {
 			pnCenter = new JPanel();
@@ -210,6 +240,7 @@ public class MainWindow extends JFrame {
 		}
 		return pnCenter;
 	}
+
 	private JPanel getPnLibrary() {
 		if (pnLibrary == null) {
 			pnLibrary = new JPanel();
@@ -220,6 +251,7 @@ public class MainWindow extends JFrame {
 		}
 		return pnLibrary;
 	}
+
 	private JLabel getLblLibrary() {
 		if (lblLibrary == null) {
 			lblLibrary = new JLabel("♪♫ Library:");
@@ -227,6 +259,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblLibrary;
 	}
+
 	private JScrollPane getSpLibrary() {
 		if (spLibrary == null) {
 			spLibrary = new JScrollPane();
@@ -234,6 +267,7 @@ public class MainWindow extends JFrame {
 		}
 		return spLibrary;
 	}
+
 	private JList getListlLibrary() {
 		if (listLibrary == null) {
 			model1 = new DefaultListModel();
@@ -241,6 +275,7 @@ public class MainWindow extends JFrame {
 		}
 		return listLibrary;
 	}
+
 	private JPanel getPnLibButtons() {
 		if (pnLibButtons == null) {
 			pnLibButtons = new JPanel();
@@ -250,6 +285,7 @@ public class MainWindow extends JFrame {
 		}
 		return pnLibButtons;
 	}
+
 	private JButton getBtnAddLibrary() {
 		if (btnAddLibrary == null) {
 			btnAddLibrary = new JButton("Add to Playlist");
@@ -265,6 +301,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnAddLibrary;
 	}
+
 	private JButton getBtnDelLibrary() {
 		if (btnDelLibrary == null) {
 			btnDelLibrary = new JButton("Delete");
@@ -272,7 +309,7 @@ public class MainWindow extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					if (listLibrary.getSelectedIndex() != -1) {
 						model1.remove(listLibrary.getSelectedIndex());
-					}					
+					}
 				}
 			});
 			btnDelLibrary.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -280,6 +317,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnDelLibrary;
 	}
+
 	private JPanel getPnPlayList() {
 		if (pnPlayList == null) {
 			pnPlayList = new JPanel();
@@ -290,6 +328,7 @@ public class MainWindow extends JFrame {
 		}
 		return pnPlayList;
 	}
+
 	private JLabel getLblPlaylist() {
 		if (lblPlaylist == null) {
 			lblPlaylist = new JLabel("♪♫ Playlist:");
@@ -297,6 +336,7 @@ public class MainWindow extends JFrame {
 		}
 		return lblPlaylist;
 	}
+
 	private JScrollPane getSpPlaylist() {
 		if (spPlaylist == null) {
 			spPlaylist = new JScrollPane();
@@ -304,6 +344,7 @@ public class MainWindow extends JFrame {
 		}
 		return spPlaylist;
 	}
+
 	private JList getListPlaylist() {
 		if (listPlaylist == null) {
 			model2 = new DefaultListModel();
@@ -311,6 +352,7 @@ public class MainWindow extends JFrame {
 		}
 		return listPlaylist;
 	}
+
 	private JPanel getPnPlayButtons() {
 		if (pnPlayButtons == null) {
 			pnPlayButtons = new JPanel();
@@ -323,13 +365,14 @@ public class MainWindow extends JFrame {
 		}
 		return pnPlayButtons;
 	}
+
 	private JButton getBtnRewind() {
 		if (btnRewind == null) {
 			btnRewind = new JButton("◄◄");
 			btnRewind.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					int selectedSong = listPlaylist.getSelectedIndex();
-					
+
 					if (listPlaylist.getSelectedIndex() > 0) {
 						listPlaylist.setSelectedIndex(--selectedSong);
 						mp.play(((MyFile) listPlaylist.getSelectedValue()).getF());
@@ -340,6 +383,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnRewind;
 	}
+
 	private JButton getBtnPlay() {
 		if (btnPlay == null) {
 			btnPlay = new JButton("►");
@@ -352,6 +396,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnPlay;
 	}
+
 	private JButton getBtnStop() {
 		if (btnStop == null) {
 			btnStop = new JButton("■");
@@ -364,13 +409,14 @@ public class MainWindow extends JFrame {
 		}
 		return btnStop;
 	}
+
 	private JButton getBtnForward() {
 		if (btnForward == null) {
 			btnForward = new JButton("►►");
 			btnForward.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					int selectedSong = listPlaylist.getSelectedIndex();
-					
+
 					if (listPlaylist.getSelectedIndex() < model2.getSize() - 1) {
 						listPlaylist.setSelectedIndex(++selectedSong);
 						mp.play(((MyFile) listPlaylist.getSelectedValue()).getF());
@@ -381,6 +427,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnForward;
 	}
+
 	private JButton getBtnDelete() {
 		if (btnDelete == null) {
 			btnDelete = new JButton("Del");
@@ -396,6 +443,7 @@ public class MainWindow extends JFrame {
 		}
 		return btnDelete;
 	}
+
 	private JMenuBar getMenuBar_1() {
 		if (menuBar == null) {
 			menuBar = new JMenuBar();
@@ -406,6 +454,7 @@ public class MainWindow extends JFrame {
 		}
 		return menuBar;
 	}
+
 	private JMenu getMnFile() {
 		if (mnFile == null) {
 			mnFile = new JMenu("File");
@@ -416,6 +465,7 @@ public class MainWindow extends JFrame {
 		}
 		return mnFile;
 	}
+
 	private JMenu getMnPlay() {
 		if (mnPlay == null) {
 			mnPlay = new JMenu("Play");
@@ -424,6 +474,7 @@ public class MainWindow extends JFrame {
 		}
 		return mnPlay;
 	}
+
 	private JMenu getMnOptions() {
 		if (mnOptions == null) {
 			mnOptions = new JMenu("Options");
@@ -432,6 +483,7 @@ public class MainWindow extends JFrame {
 		}
 		return mnOptions;
 	}
+
 	private JMenu getMnHelp() {
 		if (mnHelp == null) {
 			mnHelp = new JMenu("Help");
@@ -442,6 +494,7 @@ public class MainWindow extends JFrame {
 		}
 		return mnHelp;
 	}
+
 	private JMenuItem getMntmOpen() {
 		if (mntmOpen == null) {
 			mntmOpen = new JMenuItem("Open...");
@@ -454,12 +507,14 @@ public class MainWindow extends JFrame {
 		}
 		return mntmOpen;
 	}
+
 	private JSeparator getSeparator() {
 		if (separator == null) {
 			separator = new JSeparator();
 		}
 		return separator;
 	}
+
 	private JMenuItem getMntmExit() {
 		if (mntmExit == null) {
 			mntmExit = new JMenuItem("Exit");
@@ -472,6 +527,7 @@ public class MainWindow extends JFrame {
 		}
 		return mntmExit;
 	}
+
 	private JMenuItem getMntmNext() {
 		if (mntmNext == null) {
 			mntmNext = new JMenuItem("Next");
@@ -479,6 +535,7 @@ public class MainWindow extends JFrame {
 		}
 		return mntmNext;
 	}
+
 	private JMenuItem getMntmRandom() {
 		if (mntmRandom == null) {
 			mntmRandom = new JMenuItem("Random");
@@ -486,6 +543,7 @@ public class MainWindow extends JFrame {
 		}
 		return mntmRandom;
 	}
+
 	private JMenuItem getMntmContents() {
 		if (mntmContents == null) {
 			mntmContents = new JMenuItem("Contents");
@@ -493,12 +551,14 @@ public class MainWindow extends JFrame {
 		}
 		return mntmContents;
 	}
+
 	private JSeparator getSeparator_1() {
 		if (separator_1 == null) {
 			separator_1 = new JSeparator();
 		}
 		return separator_1;
 	}
+
 	private JMenuItem getMntmAbout() {
 		if (mntmAbout == null) {
 			mntmAbout = new JMenuItem("About");
@@ -513,11 +573,9 @@ public class MainWindow extends JFrame {
 			selector.setMultiSelectionEnabled(true);
 			selector.setFileFilter(new FileNameExtensionFilter("MP3 Files", "mp3"));
 			selector.setCurrentDirectory(new File(System.getProperty("user.home") + "/Desktop"));
-		}		
+		}
 		return selector;
 	}
-	
-
 
 	private void whenPressedOpen() {
 		int response = getSelector().showOpenDialog(this);
@@ -527,5 +585,5 @@ public class MainWindow extends JFrame {
 			}
 		}
 	}
-		
+
 }
