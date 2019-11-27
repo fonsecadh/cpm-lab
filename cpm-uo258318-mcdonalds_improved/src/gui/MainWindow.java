@@ -58,6 +58,21 @@ public class MainWindow extends JFrame {
 	private JLabel lblCode;
 	private JTextField txtCode;
 	private final ButtonGroup grOrder = new ButtonGroup();
+	private JTextField txtPrice;
+	private JButton btnCancel;
+	private JButton btnNext;
+	private JButton btnPrevious2;
+	private JButton btnNext2;
+	private JButton btnPrevious3;
+	private JButton btnFinish;
+	private JTabbedPane pnOrder;
+	private JScrollPane scFood;
+	private JScrollPane scDrinks;
+	private JList<Product> foodList;
+	private JList<Product> drinksList;
+
+	private DefaultListModel<Product> foodModel = null;
+	private DefaultListModel<Product> drinksModel = null;
 
 	/**
 	 * Launch the application.
@@ -124,7 +139,10 @@ public class MainWindow extends JFrame {
 
 	protected void initialize() {
 		order.initialize();
-		// To Complete...
+		drinksModel.clear();
+		foodModel.clear();
+		txtPrice.setText("");
+		btnNext.setEnabled(false);
 	}
 
 	private JPanel getPnInfo1() {
@@ -133,6 +151,7 @@ public class MainWindow extends JFrame {
 			pnInfo1.setBackground(Color.WHITE);
 			pnInfo1.setLayout(new BorderLayout(0, 0));
 			pnInfo1.add(getPnBts1(), BorderLayout.SOUTH);
+			pnInfo1.add(getPnOrder(), BorderLayout.NORTH);
 
 		}
 		return pnInfo1;
@@ -154,10 +173,18 @@ public class MainWindow extends JFrame {
 			pnProducts = new JPanel();
 			pnProducts.setBorder(new LineBorder(Color.ORANGE, 4));
 			pnProducts.setBackground(Color.WHITE);
-			// Complete 1...
-
+			pnProducts.setLayout(new GridLayout(0, 5, 0, 0));
+			createButtons();
 		}
 		return pnProducts;
+	}
+
+	private void createButtons() {
+		pnProducts.removeAll();
+		int i = 0;
+		for (Product p : menu.getProducts()) {
+			pnProducts.add(newButton(i++, p));
+		}
 	}
 
 	private void adaptImage(JButton button, String imagePath) {
@@ -192,13 +219,21 @@ public class MainWindow extends JFrame {
 	}
 
 	// Complete 2
-	private void addToOrder(int posArticuloEnCarta) {
-
+	private void addToOrder(int pos) {
+		Product p = menu.getProducts().get(pos);
+		order.add(p, 1);
+		showInList(p);
+		getTxtPrice().setText(" Price: " + String.format("%.2f", order.calcTotal()));
+		btnNext.setEnabled(true);
 	}
 
 	// Complete 3
 	private void showInList(Product a) {
-
+		if (a.getType().equals("Drink")) {
+			drinksModel.addElement(a);
+		} else {
+			foodModel.addElement(a);
+		}
 	}
 
 	private JPanel getPnBts1() {
@@ -206,6 +241,9 @@ public class MainWindow extends JFrame {
 			pnBts1 = new JPanel();
 			pnBts1.setBackground(Color.WHITE);
 			pnBts1.setLayout(new GridLayout(1, 3, 0, 0));
+			pnBts1.add(getTxtPrice());
+			pnBts1.add(getBtnCancel());
+			pnBts1.add(getBtnNext());
 		}
 		return pnBts1;
 	}
@@ -215,6 +253,8 @@ public class MainWindow extends JFrame {
 			pnBts2 = new JPanel();
 			pnBts2.setBackground(Color.WHITE);
 			pnBts2.setLayout(new GridLayout(1, 3, 0, 0));
+			pnBts2.add(getBtnPrevious2());
+			pnBts2.add(getBtnNext2());
 		}
 		return pnBts2;
 	}
@@ -224,6 +264,8 @@ public class MainWindow extends JFrame {
 			pnBts3 = new JPanel();
 			pnBts3.setBackground(Color.WHITE);
 			pnBts3.setLayout(new GridLayout(1, 3, 0, 0));
+			pnBts3.add(getBtnPrevious3());
+			pnBts3.add(getBtnFinish());
 		}
 		return pnBts3;
 	}
@@ -392,12 +434,24 @@ public class MainWindow extends JFrame {
 		}
 		return true;
 	}
+	
+	private void showPn1() {
+		getPnInfo1().add(getPnOrder());
+		getPnBts1().add(getTxtPrice(), 0);
+		((CardLayout) getPnContents().getLayout()).show(getPnContents(), "pn1");
+	}
+
+	private void showPn2() {
+		getPnInfo2().add(getPnOrder());
+		getPnBts2().add(getTxtPrice(), 0);
+		((CardLayout) getPnContents().getLayout()).show(getPnContents(), "pn2");
+	}
 
 	private void showPn3() {
-		if (checkFields())
-
-		{
-			// Complete
+		if (checkFields()) {
+			getPnInfo3().add(getPnOrder());
+			getPnBts3().add(getTxtPrice(), 0);
+			((CardLayout) getPnContents().getLayout()).show(getPnContents(), "pn3");
 		}
 	}
 
@@ -500,7 +554,6 @@ public class MainWindow extends JFrame {
 	private void finish() {
 		order.saveOrder(getTxtCode().getText());
 		initialize();
-		// Complete...
 	}
 
 	private JLabel getLblAdvise() {
@@ -540,5 +593,119 @@ public class MainWindow extends JFrame {
 			txtCode.setColumns(10);
 		}
 		return txtCode;
+	}
+
+	private JTextField getTxtPrice() {
+		if (txtPrice == null) {
+			txtPrice = new JTextField();
+			txtPrice.setColumns(10);
+		}
+		return txtPrice;
+	}
+
+	private JButton getBtnCancel() {
+		if (btnCancel == null) {
+			btnCancel = new JButton("Cancel");
+		}
+		return btnCancel;
+	}
+
+	private JButton getBtnNext() {
+		if (btnNext == null) {
+			btnNext = new JButton("Next");
+			btnNext.setEnabled(false);
+			btnNext.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					showPn2();
+				}
+			});
+		}
+		return btnNext;
+	}
+
+	private JButton getBtnPrevious2() {
+		if (btnPrevious2 == null) {
+			btnPrevious2 = new JButton("Previous");
+			btnPrevious2.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					showPn1();
+				}
+			});
+		}
+		return btnPrevious2;
+	}
+
+	private JButton getBtnNext2() {
+		if (btnNext2 == null) {
+			btnNext2 = new JButton("Next");
+			btnNext2.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					showPn3();
+				}
+			});
+		}
+		return btnNext2;
+	}
+
+	private JButton getBtnPrevious3() {
+		if (btnPrevious3 == null) {
+			btnPrevious3 = new JButton("Previous");
+			btnPrevious3.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					showPn2();
+				}
+			});
+		}
+		return btnPrevious3;
+	}
+
+	private JButton getBtnFinish() {
+		if (btnFinish == null) {
+			btnFinish = new JButton("Finish");
+		}
+		return btnFinish;
+	}
+
+	private JTabbedPane getPnOrder() {
+		if (pnOrder == null) {
+			pnOrder = new JTabbedPane(JTabbedPane.TOP);
+			pnOrder.addTab("Food", null, getScFood(), null);
+			pnOrder.setDisplayedMnemonicIndexAt(0, 0);
+			pnOrder.addTab("Drinks", null, getScDrinks(), null);
+			pnOrder.setDisplayedMnemonicIndexAt(1, 0);
+		}
+		return pnOrder;
+	}
+
+	private JScrollPane getScFood() {
+		if (scFood == null) {
+			scFood = new JScrollPane();
+			scFood.setViewportView(getFoodList());
+		}
+		return scFood;
+	}
+
+	private JScrollPane getScDrinks() {
+		if (scDrinks == null) {
+			scDrinks = new JScrollPane();
+			scDrinks.setViewportView(getDrinksList());
+		}
+		return scDrinks;
+	}
+
+	private JList<Product> getFoodList() {
+		if (foodList == null) {
+			foodModel = new DefaultListModel<Product>();
+			foodList = new JList<Product>(foodModel);
+		}
+		return foodList;
+	}
+
+	private JList<Product> getDrinksList() {
+		if (drinksList == null) {
+			drinksModel = new DefaultListModel<Product>();
+			drinksList = new JList<Product>(drinksModel);
+		}
+		return drinksList;
 	}
 }
