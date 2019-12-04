@@ -29,6 +29,14 @@ public class Order {
 		}
 	}
 	
+	public void remove(int pos) {
+		if (pos < 0 || pos >= orderList.size()) {
+			return;
+		}
+		
+		orderList.remove(pos);
+	}
+	
 	public float calcTotal(){
 		float total = 0.0f;
 		for (Product a : orderList){

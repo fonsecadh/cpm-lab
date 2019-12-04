@@ -13,11 +13,18 @@ import java.awt.Rectangle;
 import java.awt.BorderLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.swing.border.LineBorder;
 import java.awt.CardLayout;
 import javax.swing.border.TitledBorder;
 
 import logic.*;
+import logic.filter.McDonnaldProductFilter;
+import logic.filter.ProductFilter;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -70,9 +77,17 @@ public class MainWindow extends JFrame {
 	private JScrollPane scDrinks;
 	private JList<Product> foodList;
 	private JList<Product> drinksList;
+	private JPanel pnProductView;
+	private JPanel pnFilter;
+	private JButton btnHamburgers;
+	private JButton btnDrinks;
+	private JButton btnSides;
+	private JButton btnDesserts;
 
 	private DefaultListModel<Product> foodModel = null;
 	private DefaultListModel<Product> drinksModel = null;
+
+	private ProductFilter productFilter;
 
 	/**
 	 * Launch the application.
@@ -109,6 +124,10 @@ public class MainWindow extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getPnlLogo(), BorderLayout.NORTH);
 		contentPane.add(getPnContents(), BorderLayout.CENTER);
+
+		// We instantiate the McDonnaldProductFilter logic class
+		Product[] aux = new Product[menu.getProducts().size()];
+		this.productFilter = new McDonnaldProductFilter(menu.getProducts().toArray(aux));
 
 		// To change the size of the pictures when we resize the buttons.
 		// This avoids the problem of the 0 size exception.
@@ -434,7 +453,7 @@ public class MainWindow extends JFrame {
 		}
 		return true;
 	}
-	
+
 	private void showPn1() {
 		getPnInfo1().add(getPnOrder());
 		getPnBts1().add(getTxtPrice(), 0);
@@ -459,8 +478,8 @@ public class MainWindow extends JFrame {
 		if (pn1 == null) {
 			pn1 = new JPanel();
 			pn1.setLayout(new BorderLayout(0, 0));
-			pn1.add(getPnProducts(), BorderLayout.CENTER);
 			pn1.add(getPnInfo1(), BorderLayout.SOUTH);
+			pn1.add(getPnProductView(), BorderLayout.CENTER);
 		}
 		return pn1;
 	}
@@ -662,6 +681,12 @@ public class MainWindow extends JFrame {
 	private JButton getBtnFinish() {
 		if (btnFinish == null) {
 			btnFinish = new JButton("Finish");
+			btnFinish.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					initialize();
+					showPn1();
+				}
+			});
 		}
 		return btnFinish;
 	}
@@ -697,6 +722,7 @@ public class MainWindow extends JFrame {
 		if (foodList == null) {
 			foodModel = new DefaultListModel<Product>();
 			foodList = new JList<Product>(foodModel);
+			foodList.addKeyListener(new DeleteKeyListener());
 		}
 		return foodList;
 	}
@@ -705,7 +731,144 @@ public class MainWindow extends JFrame {
 		if (drinksList == null) {
 			drinksModel = new DefaultListModel<Product>();
 			drinksList = new JList<Product>(drinksModel);
+			drinksList.addKeyListener(new DeleteKeyListener());
 		}
 		return drinksList;
+	}
+
+	private JPanel getPnProductView() {
+		if (pnProductView == null) {
+			pnProductView = new JPanel();
+			pnProductView.setLayout(new BorderLayout(0, 0));
+			pnProductView.add(getPnProducts());
+			pnProductView.add(getPnFilter(), BorderLayout.WEST);
+		}
+		return pnProductView;
+	}
+
+	private JPanel getPnFilter() {
+		if (pnFilter == null) {
+			pnFilter = new JPanel();
+			pnFilter.setLayout(new GridLayout(0, 1, 0, 0));
+			pnFilter.add(getBtnHamburgers());
+			pnFilter.add(getBtnDrinks());
+			pnFilter.add(getBtnSides());
+			pnFilter.add(getBtnDesserts());
+		}
+		return pnFilter;
+	}
+
+	private JButton getBtnHamburgers() {
+		if (btnHamburgers == null) {
+			btnHamburgers = new JButton("Hamburgers");
+			btnHamburgers.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					filteringProducts(ProductType.BURGER);
+				}
+			});
+			btnHamburgers.setMnemonic('h');
+			btnHamburgers.setBackground(Color.WHITE);
+			btnHamburgers.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnHamburgers.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnHamburgers.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Hamburguesa.png")));
+			btnHamburgers.setBounds(10, 11, 136, 121);
+		}
+		return btnHamburgers;
+	}
+
+	private JButton getBtnDrinks() {
+		if (btnDrinks == null) {
+			btnDrinks = new JButton("Drinks");
+			btnDrinks.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					filteringProducts(ProductType.DRINK);
+				}
+			});
+			btnDrinks.setMnemonic('d');
+			btnDrinks.setBackground(Color.WHITE);
+			btnDrinks.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnDrinks.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnDrinks.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Bebida.png")));
+			btnDrinks.setBounds(10, 143, 136, 121);
+		}
+		return btnDrinks;
+	}
+
+	private JButton getBtnSides() {
+		if (btnSides == null) {
+			btnSides = new JButton("Sides");
+			btnSides.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					filteringProducts(ProductType.SIDE);
+				}
+			});
+			btnSides.setMnemonic('i');
+			btnSides.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Complemento.png")));
+			btnSides.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnSides.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnSides.setBackground(Color.WHITE);
+			btnSides.setBounds(10, 272, 136, 121);
+		}
+		return btnSides;
+	}
+
+	private JButton getBtnDesserts() {
+		if (btnDesserts == null) {
+			btnDesserts = new JButton("Desserts");
+			btnDesserts.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					filteringProducts(ProductType.DESSERT);
+				}
+			});
+			btnDesserts.setMnemonic('s');
+			btnDesserts.setBackground(Color.WHITE);
+			btnDesserts.setHorizontalTextPosition(AbstractButton.CENTER);
+			btnDesserts.setVerticalTextPosition(AbstractButton.BOTTOM);
+			btnDesserts.setIcon(new ImageIcon(MainWindow.class.getResource("/img/Postre.png")));
+			btnDesserts.setBounds(10, 404, 136, 121);
+		}
+		return btnDesserts;
+	}
+
+	/**
+	 * Disables every item except the ones we want to filter.
+	 *
+	 * @param type The product type acting as a filter.
+	 */
+	private void filteringProducts(ProductType type) {
+		Arrays
+			.asList(getPnProducts().getComponents())
+			.parallelStream()
+			.forEach(c -> enableFilteredProducts((JButton) c, type));
+	}
+
+	private void enableFilteredProducts(JButton c, ProductType type) {
+		if (menu
+				.getProducts()
+				.get(Integer.parseInt(c.getActionCommand())).getType().toLowerCase()
+				.equals(type.toString().toLowerCase())) {
+			c.setEnabled(true);
+		} else {
+			c.setEnabled(false);
+		}
+	}
+
+	private void deleteItemFromOrder(JList list) {
+		int selected = list.getSelectedIndex();
+		
+		if (selected != -1) {
+			order.remove(selected);
+			((DefaultListModel) list.getModel()).remove(selected);
+		} 	
+	}
+
+
+	class DeleteKeyListener extends KeyAdapter {
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+				deleteItemFromOrder((JList) e.getSource());
+			}
+		}
 	}
 }

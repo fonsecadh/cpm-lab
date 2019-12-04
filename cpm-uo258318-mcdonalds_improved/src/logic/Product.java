@@ -77,7 +77,7 @@ public class Product {
 		buffer.append(this.name);
 		buffer.append(" - ");
 		buffer.append(this.price);
-		buffer.append(" €");
+		buffer.append(" â‚¬");
 		if (this.units != 0) {
 			buffer.append(" (");
 			buffer.append(this.units);
